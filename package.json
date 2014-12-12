@@ -1,0 +1,27 @@
+{
+  "name": "tilecomb",
+  "version": "0.0.0",
+  "description": "A pluggable map tile server.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R list"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/naturalatlas/tilecomb.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/naturalatlas/tilecomb/issues"
+  },
+  "homepage": "https://github.com/naturalatlas/tilecomb",
+  "dependencies": {
+    "async": "^0.9.0",
+    "lodash": "^2.4.1",
+    "lru-cache": "^2.5.0"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "mocha": "^2.0.1"
+  }
+}
