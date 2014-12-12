@@ -32,7 +32,7 @@ tilecombServer.listen(8080);
 
 With a layer file looking like:
 
-```
+```js
 var filesystem = require('tilecomb-filesystem');
 var mapnik = require('tilecomb-mapnik');
 var gm = require('tilecomb-gm');
@@ -71,39 +71,39 @@ app.use(tilecomb.middleware({
 }));
 ```
 
-## API Reference
+### API Reference
 
-### [TileServer](#)
+#### [TileServer](#tileserver)
 
-#### server.listen(port, [callback])
+##### server.listen(port, [callback])
 Starts accepting requests on the specified port.
 
-#### server.registerLayer(init)
-The `init` function will be called immediately with a blank [TileLayer](#) instance to be configured.
+##### server.registerLayer(init)
+The `init` function will be called immediately with a blank [TileLayer](#tilelayer) instance to be configured.
 
-### [TileLayer](#)
+#### [TileLayer](#tilelayer)
 
-#### layer.setName(name)
+##### layer.setName(name)
 Sets the name of the layer. Whatever name is used will be the first part of the url that can be used to fetch tiles: `/:layer/...`
 
-#### layer.registerRoute(filename, init)
+##### layer.registerRoute(filename, init)
 
-The `init` function will be called immediately with a blank [TileRequestHandler](#) instance to be configured.
+The `init` function will be called immediately with a blank [TileRequestHandler](#tilerequesthandler) instance to be configured.
 
-### [TileRequestHandler](#)
+#### [TileRequestHandler](#tilerequesthandler)
 
-#### handler.setCacheFetchMode(mode)
+##### handler.setCacheFetchMode(mode)
 Defines how cache fetching happens. The mode can be `"sequential"` or `"race"`. If set to `"race"`, Tilecomb will fetch from both caches simultaneously and return the first that wins.
 
-#### handler.registerProvider(provider)
-Registers a provider that serves as the source of the layer. See ["Writing Providers"](#) for more info.
+##### handler.registerProvider(provider)
+Registers a provider that serves as the source of the layer. See ["Writing Providers"](#writing-providers) for more info.
 
-#### handler.registerCache(provider)
-Registers a cache can be used to fetch/persist the tile file. See ["Writing Caches"](#) for more info. The cache fetch order will be the order in which caches were registered (unless when `"race"` mode is enabled).
+##### handler.registerCache(provider)
+Registers a cache can be used to fetch/persist the tile file. See ["Writing Caches"](#writing-caches) for more info. The cache fetch order will be the order in which caches were registered (unless when `"race"` mode is enabled).
 
-### [TileRequest](#)
+#### [TileRequest](#tilerequest)
 
-A tile request contains the properties: `x`, `y`, `z`, `layer` (string), and `filename`.
+A request contains these properties: `x`, `y`, `z`, `layer` (string), and `filename`.
 
 ## Extending Tilecomb
 
