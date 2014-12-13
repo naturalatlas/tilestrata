@@ -87,6 +87,9 @@ The `init` function will be called immediately with a blank [TileLayer](#tilelay
 ##### server.getTile(layer, filename, x, y, z, callback)
 Attempts to retrieve a tile from the specified layer (string). The callback will be invoked with three arguments: `err`, `buffer`, and `headers`.
 
+##### server.version
+The version of TileStrata (useful to plugins, mainly).
+
 #### [TileLayer](#tilelayer)
 
 ##### layer.setName(name)

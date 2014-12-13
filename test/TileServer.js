@@ -4,6 +4,11 @@ var TileRequest = require('../lib/TileRequest.js');
 var assert = require('chai').assert;
 
 describe('TileServer', function() {
+	it('should have "version" property', function() {
+		var server = new TileServer();
+		var pkg = require('../package.json');
+		assert.equal(server.version, pkg.version);
+	});
 	describe('registerLayer()', function() {
 		it('should operate normally', function() {
 			var _layer;
