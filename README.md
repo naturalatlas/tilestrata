@@ -15,7 +15,7 @@ TileStrata consists of three main actors, usually implemented as plugins:
 
 - *"provider"* – Generates a new tile (e.g mapnik)
 - *"cache"* – Persists a tile for later requests (e.g. filesystem)
-- *"transform"* – Takes a raw tile and tranforms it (e.g. image scaling / compression)
+- *"transform"* – Takes a raw tile and transforms it (e.g. image scaling / compression)
 
 #### List of Plugins
 
@@ -108,7 +108,10 @@ Defines how cache fetching happens. The mode can be `"sequential"` or `"race"`. 
 Registers a provider that serves as the source of the layer. See ["Writing Providers"](#writing-providers) for more info.
 
 ##### handler.registerCache(cache)
-Registers a cache can be used to fetch/persist the tile file. See ["Writing Caches"](#writing-caches) for more info. The cache fetch order will be the order in which caches were registered (unless when `"race"` mode is enabled).
+Registers a cache that can be used to fetch/persist the tile file. See ["Writing Caches"](#writing-caches) for more info. The cache fetch order will be the order in which caches were registered (unless when `"race"` mode is enabled).
+
+##### handler.registerTransform(transform)
+Registers a transform that takes a buffer and set of headers and returns a new buffer + headers. See ["Writing Transforms"](#writing-transforms) for more info. The transforms will be in the same order as they were registered.
 
 #### [TileRequest](#tilerequest)
 
@@ -147,6 +150,23 @@ module.exports = function(options) {
             callback(err);
         },
         serve: function(server, req, callback) {
+            callback(err, buffer, headers);
+        }
+    };
+};
+```
+
+### Writing Transforms
+
+Transforms modify the result from a provider before it's served (and cached). The `registerTransform` method expects an object containing a `transform` method, and optionally an `init` method.
+
+```js
+module.exports = function(options) {
+    return {
+        init: function(server, callback) {
+            callback(err);
+        },
+        transform: function(server, req, buffer, headers, callback) {
             callback(err, buffer, headers);
         }
     };

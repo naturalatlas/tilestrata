@@ -8,6 +8,18 @@ describe('TileRequestHandler', function() {
 		var handler = new TileRequestHandler();
 		assert.equal(handler.cacheFetchMode, 'sequential');
 	});
+	it('should have a "transforms" property', function() {
+		var handler = new TileRequestHandler();
+		assert.deepEqual(handler.transforms, []);
+	});
+	it('should have a "caches" property', function() {
+		var handler = new TileRequestHandler();
+		assert.deepEqual(handler.caches, []);
+	});
+	it('should have a "provider" property', function() {
+		var handler = new TileRequestHandler();
+		assert.deepEqual(handler.provider, null);
+	});
 	describe('setCacheFetchMode()', function() {
 		it('should set cacheFetchMode property', function() {
 			var handler = new TileRequestHandler();
@@ -46,6 +58,26 @@ describe('TileRequestHandler', function() {
 			assert.equal(handler.provider, _provider);
 		});
 	});
+	describe('registerTransform()', function() {
+		it('should throw if passed invalid value', function() {
+			assert.throws(function() {
+				var handler = new TileRequestHandler();
+				handler.registerTransform(null);
+			}, /Falsy value passed/);
+			assert.throws(function() {
+				var handler = new TileRequestHandler();
+				handler.registerTransform({});
+			}, /Attempted to register a transform with no transform/);
+		});
+		it('should operate normally', function() {
+			var handler = new TileRequestHandler();
+			var _transform1 = {transform: function() {}};
+			var _transform2 = {transform: function() {}};
+			handler.registerTransform(_transform1);
+			handler.registerTransform(_transform2);
+			assert.deepEqual(handler.transforms, [_transform1, _transform2]);
+		});
+	});
 	describe('registerCache()', function() {
 		it('should throw if passed invalid value', function() {
 			assert.throws(function() {
@@ -79,11 +111,13 @@ describe('TileRequestHandler', function() {
 				done();
 			});
 		});
-		it('should call init() on provider and caches', function(done) {
+		it('should call init() on provider, caches, and transforms', function(done) {
 			var server = new TileServer();
 			var handler = new TileRequestHandler();
 			var _cache1_called = false;
 			var _cache2_called = false;
+			var _transform1_called = false;
+			var _transform2_called = false;
 			var _provider_called = false;
 			handler.registerCache({
 				init: function(_server, callback) {
@@ -111,10 +145,28 @@ describe('TileRequestHandler', function() {
 				},
 				serve: function() {}
 			});
+			handler.registerTransform({
+				init: function(_server, callback) {
+					assert.equal(_server, server);
+					_transform1_called = true;
+					callback();
+				},
+				transform: function() {}
+			});
+			handler.registerTransform({
+				init: function(_server, callback) {
+					assert.equal(_server, server);
+					_transform2_called = true;
+					callback();
+				},
+				transform: function() {}
+			});
 			handler.initialize(server, function(err) {
 				assert.isNull(err);
 				assert.isTrue(_cache1_called);
 				assert.isTrue(_cache2_called);
+				assert.isTrue(_transform1_called);
+				assert.isTrue(_transform2_called);
 				assert.isTrue(_provider_called);
 				done();
 			});
@@ -206,6 +258,117 @@ describe('TileRequestHandler', function() {
 				assert.equal(buffer.toString('utf8'), 'success');
 				assert.deepEqual(headers, {'X-Test-Status': 'success'});
 				done();
+			});
+		});
+		it('should skip transforms if provider fails', function(done) {
+			var mockServer = new TileServer();
+			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var handler = new TileRequestHandler();
+
+			handler.registerProvider({
+				serve: function(server, req, callback) {
+					callback(new Error('Provider failed'));
+				}
+			});
+			handler.registerTransform({
+				transform: function(server, req, buffer, headers, callback) {
+					throw new Error('Should not be called');
+				}
+			});
+			handler.registerTransform({
+				transform: function(server, req, buffer, headers, callback) {
+					throw new Error('Should not be called');
+				}
+			});
+			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
+				assert.equal(status, 500);
+				assert.equal(buffer.toString('utf8'), 'Provider failed');
+				assert.deepEqual(headers, {});
+				setImmediate(done);
+			});
+		});
+		it('should return 500 status if transform fails (and skip cache set)', function(done) {
+			var mockServer = new TileServer();
+			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var handler = new TileRequestHandler();
+
+			handler.registerCache({
+				get: function(server, req, callback) {
+					callback();
+				},
+				set: function() {
+					throw new Error('Should not be called');
+				}
+			});
+			handler.registerProvider({
+				serve: function(server, req, callback) {
+					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
+				}
+			});
+			handler.registerTransform({
+				transform: function(server, req, buffer, headers, callback) {
+					callback(new Error('Something went wrong w/transform'))
+				}
+			});
+			handler.registerTransform({
+				transform: function(server, req, buffer, headers, callback) {
+					throw new Error('Should not be called');
+				}
+			});
+			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
+				assert.equal(status, 500);
+				assert.equal(buffer.toString('utf8'), 'Something went wrong w/transform');
+				assert.deepEqual(headers, {});
+				setImmediate(done);
+			});
+		});
+		it('should execute transforms after provider, and then cache transform result', function(done) {
+			var mockServer = new TileServer();
+			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var handler = new TileRequestHandler();
+			var _cache_called = false;
+
+			handler.registerCache({
+				get: function(server, req, callback) {
+					_cache_called = true;
+					callback(new Error('Cache failure'));
+				},
+				set: function(server, req, buffer, headers, callback) {
+					assert.equal(buffer.toString('utf8'), 'transform2');
+					assert.deepEqual(headers, {'X-Transform': '2'});
+					done();
+				}
+			});
+			handler.registerProvider({
+				serve: function(server, req, callback) {
+					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
+				}
+			});
+			handler.registerTransform({
+				transform: function(server, req, buffer, headers, callback) {
+					assert.equal(server, mockServer);
+					assert.equal(req, mockRequest);
+					assert.instanceOf(buffer, Buffer);
+					assert.equal(buffer.toString('utf8'), 'success');
+					assert.deepEqual(headers, {'X-Test-Status': 'success'});
+					callback(null, new Buffer('transform1', 'utf8'), {'X-Transform': '1'});
+				}
+			});
+			handler.registerTransform({
+				transform: function(server, req, buffer, headers, callback) {
+					assert.equal(server, mockServer);
+					assert.equal(req, mockRequest);
+					assert.instanceOf(buffer, Buffer);
+					assert.equal(buffer.toString('utf8'), 'transform1');
+					assert.deepEqual(headers, {'X-Transform': '1'});
+					callback(null, new Buffer('transform2', 'utf8'), {'X-Transform': '2'});
+				}
+			});
+			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
+				assert.isTrue(_cache_called);
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'transform2');
+				assert.deepEqual(headers, {'X-Transform': '2'});
 			});
 		});
 		it('should skip caching and return 500 status when provider fails', function(done) {
