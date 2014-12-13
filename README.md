@@ -1,4 +1,7 @@
 # TileStrata
+[![NPM version](http://img.shields.io/npm/v/tilestrata.svg?style=flat)](https://www.npmjs.org/package/tilestrata)
+[![Build Status](http://img.shields.io/travis/naturalatlas/tilestrata/master.svg?style=flat)](https://travis-ci.org/naturalatlas/tilestrata)
+[![Coverage Status](http://img.shields.io/coveralls/naturalatlas/tilestrata/master.svg?style=flat)](https://coveralls.io/r/naturalatlas/tilestrata)
 
 TileStrata is a pluggable slippy map tile server that emphasizes code-as-configuration. It's clean, highly tested, and performant. After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js.
 
@@ -16,10 +19,10 @@ TileStrata consists of three main actors, usually implemented as plugins:
 
 #### List of Plugins
 
-- [tilestrata-mapnik](#) – Render tiles with [mapnik](http://mapnik.org/).
-- [tilestrata-filesystem](#) – Cache map tiles to disk.
-- [tilestrata-dependency](#) – Fetch tiles from other layers.
-- [tilestrata-libvips](#) – Compress, resize, transcode tiles (jpg, png, webp) using [libvips](https://www.npmjs.com/package/sharp).
+- [tilestrata-mapnik](https://github.com/naturalatlas/tilestrata-mapnik) – Render tiles with [mapnik](http://mapnik.org/).
+- [tilestrata-filesystem](https://github.com/naturalatlas/tilestrata-filesystem) – Cache map tiles to disk.
+- [tilestrata-dependency](https://github.com/naturalatlas/tilestrata-dependency) – Fetch tiles from other layers.
+- [tilestrata-libvips](https://github.com/naturalatlas/tilestrata-libvips) – Compress, resize, transcode tiles (jpg, png, webp) using [libvips](https://www.npmjs.com/package/sharp).
 
 ## Configuration
 
