@@ -66,7 +66,7 @@ describe('require("tilestrata")', function() {
 				});
 			});
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
-			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {status: 200, headers: {'X-Test':'1'}, buffer: new Buffer('tile', 'utf8')}, done);
+			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {status: 200, headers: {'X-Test':'1','Content-Length': 4}, buffer: new Buffer('tile', 'utf8')}, done);
 		});
 		it('should call next() when route url doesn\'t match', function(done) {
 			var server = new TileServer();

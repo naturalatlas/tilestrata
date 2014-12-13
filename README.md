@@ -102,7 +102,7 @@ The `init` function will be called immediately with a blank [TileRequestHandler]
 #### [TileRequestHandler](#tilerequesthandler)
 
 ##### handler.setCacheFetchMode(mode)
-Defines how cache fetching happens. The mode can be `"sequential"` or `"race"`. If set to `"race"`, TileStrata will fetch from both caches simultaneously and return the first that wins.
+Defines how cache fetching happens when multiple caches are configured. The mode can be `"sequential"` or `"race"`. If set to `"race"`, TileStrata will fetch from all caches simultaneously and return the first that wins.
 
 ##### handler.registerProvider(provider)
 Registers a provider that serves as the source of the layer. See ["Writing Providers"](#writing-providers) for more info.
