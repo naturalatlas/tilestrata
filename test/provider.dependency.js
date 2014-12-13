@@ -3,7 +3,7 @@ var TileRequest = require('../lib/TileRequest.js');
 var dependency = require('../stack/provider/dependency.js');
 var assert = require('chai').assert;
 
-describe.skip('Provider Implementation "dependency"', function() {
+describe('Provider Implementation "dependency"', function() {
 	describe('server', function() {
 		it('should fetch and return dependency', function(done) {
 			var server = new TileServer();

@@ -8,13 +8,13 @@ $ npm install tilecomb --save
 
 ### Introduction
 
-Tilecomb consists of three main actors:
+Tilecomb consists of three main actors, usually implemented as plugins:
 
 - *"provider"* – Generates a new tile (e.g mapnik)
 - *"cache"* – Persists a tile for later requests (e.g. filesystem)
 - *"transform"* – Takes a raw tile and tranforms it (e.g. image scaling / compression)
 
-#### Plugins
+#### List of Plugins
 
 - [tilecomb-mapnik](#) – Render tiles with [mapnik](http://mapnik.org/).
 - [tilecomb-filesystem](#) – Cache map tiles to disk.
@@ -98,7 +98,7 @@ Defines how cache fetching happens. The mode can be `"sequential"` or `"race"`. 
 ##### handler.registerProvider(provider)
 Registers a provider that serves as the source of the layer. See ["Writing Providers"](#writing-providers) for more info.
 
-##### handler.registerCache(provider)
+##### handler.registerCache(cache)
 Registers a cache can be used to fetch/persist the tile file. See ["Writing Caches"](#writing-caches) for more info. The cache fetch order will be the order in which caches were registered (unless when `"race"` mode is enabled).
 
 #### [TileRequest](#tilerequest)
@@ -114,13 +114,13 @@ The `registerCache` method expects an object with two methods: `get`, `set`. Opt
 ```js
 module.exports = function(options) {
     return {
-        init: function(callback) {
+        init: function(server, callback) {
             callback(err);
         },
-        get: function(req, callback) {
+        get: function(server, req, callback) {
             callback(err, buffer, headers);
         },
-        set: function(req, buffer, headers, callback) {
+        set: function(server, req, buffer, headers, callback) {
             callback(err);
         }
     };
@@ -134,7 +134,7 @@ Providers are responsible for building tiles. The `registerProvider` method expe
 ```js
 module.exports = function(options) {
     return {
-        init: function(callback) {
+        init: function(server, callback) {
             callback(err);
         },
         serve: function(server, req, callback) {

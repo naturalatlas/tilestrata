@@ -13,18 +13,19 @@ FileSystemCache.prototype._file = function(req) {
 	return this._dir(req.x, req.y, req.z) + '/' + req.filename;
 };
 
-FileSystemCache.prototype.init = function(callback) {
+FileSystemCache.prototype.init = function(server, callback) {
 	fs.ensureDir(this.options.dir, callback);
 };
 
 /**
  * Retrieves a tile from the filesystem.
  *
+ * @param {TileServer} server
  * @param {TileRequest} req
  * @param {function} callback(err, buffer, headers)
  * @return {void}
  */
-FileSystemCache.prototype.get = function(req, callback) {
+FileSystemCache.prototype.get = function(server, req, callback) {
 	var file = this._file(req);
 	fs.readFile(file, function(err, buffer) {
 		if (err) return callback(err);
@@ -38,12 +39,13 @@ FileSystemCache.prototype.get = function(req, callback) {
 /**
  * Stores a tile on the filesystem.
  *
+ * @param {TileServer} server
  * @param {TileRequest} req
  * @param {Buffer} buffer
  * @param {object} headers
  * @param {Function} callback
  */
-FileSystemCache.prototype.set = function(req, buffer, headers, callback) {
+FileSystemCache.prototype.set = function(server, req, buffer, headers, callback) {
 	fs.outputFile(this._file(req), buffer, callback);
 };
 

@@ -72,21 +72,46 @@ describe('TileRequestHandler', function() {
 	});
 	describe('initialize()', function() {
 		it('should handle no provider / no caches gracefully', function(done) {
+			var server = new TileServer();
 			var handler = new TileRequestHandler();
-			handler.initialize(function(err) {
+			handler.initialize(server, function(err) {
 				assert.isNull(err);
 				done();
 			});
 		});
 		it('should call init() on provider and caches', function(done) {
+			var server = new TileServer();
 			var handler = new TileRequestHandler();
 			var _cache1_called = false;
 			var _cache2_called = false;
 			var _provider_called = false;
-			handler.registerCache({init: function(callback) { _cache1_called = true; callback(); }, get: function() {}, set: function() {}});
-			handler.registerCache({init: function(callback) { _cache2_called = true; callback(); }, get: function() {}, set: function() {}});
-			handler.registerProvider({init: function(callback) { _provider_called = true; callback(); }, serve: function() {}});
-			handler.initialize(function(err) {
+			handler.registerCache({
+				init: function(_server, callback) {
+					_cache1_called = true;
+					assert.equal(_server, server);
+					callback();
+				},
+				get: function() {},
+				set: function() {}
+			});
+			handler.registerCache({
+				init: function(_server, callback) {
+					_cache2_called = true;
+					assert.equal(_server, server);
+					callback();
+				},
+				get: function() {},
+				set: function() {}
+			});
+			handler.registerProvider({
+				init: function(_server, callback) {
+					assert.equal(_server, server);
+					_provider_called = true;
+					callback();
+				},
+				serve: function() {}
+			});
+			handler.initialize(server, function(err) {
 				assert.isNull(err);
 				assert.isTrue(_cache1_called);
 				assert.isTrue(_cache2_called);
@@ -96,18 +121,20 @@ describe('TileRequestHandler', function() {
 		});
 		it('should fail if the provider init fails', function(done) {
 			var _err = new Error('It failed');
+			var server = new TileServer();
 			var handler = new TileRequestHandler();
-			handler.registerProvider({init: function(callback) { callback(_err); }, serve: function() {}});
-			handler.initialize(function(err) {
+			handler.registerProvider({init: function(server, callback) { callback(_err); }, serve: function() {}});
+			handler.initialize(server, function(err) {
 				assert.equal(err, _err);
 				done();
 			});
 		});
 		it('should fail if any of the cache inits fail', function(done) {
 			var _err = new Error('It failed');
+			var server = new TileServer();
 			var handler = new TileRequestHandler();
-			handler.registerCache({init: function(callback) { callback(_err); }, get: function() {}, set: function() {}});
-			handler.initialize(function(err) {
+			handler.registerCache({init: function(server, callback) { callback(_err); }, get: function() {}, set: function() {}});
+			handler.initialize(server, function(err) {
 				assert.equal(err, _err);
 				done();
 			});
@@ -122,8 +149,9 @@ describe('TileRequestHandler', function() {
 			var _cache2_called = false;
 
 			handler.registerCache({
-				get: function(req, callback) {
+				get: function(server, req, callback) {
 					_cache1_called = true;
+					assert.equal(server, mockServer);
 					assert.equal(req, mockRequest);
 					assert.isFalse(_cache2_called, 'Cache 2 shouldn\'t have been called yet');
 					callback();
@@ -131,8 +159,9 @@ describe('TileRequestHandler', function() {
 				set: function() {}
 			});
 			handler.registerCache({
-				get: function(req, callback) {
+				get: function(server, req, callback) {
 					_cache2_called = true;
+					assert.equal(server, mockServer);
 					assert.isTrue(_cache1_called, 'Cache 1 should have been called first');
 					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
 				},
@@ -160,7 +189,7 @@ describe('TileRequestHandler', function() {
 			var _cache_called = false;
 
 			handler.registerCache({
-				get: function(req, callback) {
+				get: function(server, req, callback) {
 					_cache_called = true;
 					callback(new Error('Cache failure'));
 				},
@@ -185,7 +214,7 @@ describe('TileRequestHandler', function() {
 			var handler = new TileRequestHandler();
 
 			handler.registerCache({
-				get: function(req, callback) { callback(); },
+				get: function(server, req, callback) { callback(); },
 				set: function() { throw new Error('Should not have been called') }
 			});
 			handler.registerProvider({
@@ -209,14 +238,14 @@ describe('TileRequestHandler', function() {
 			var _cache2_finished = false;
 
 			handler.registerCache({
-				get: function(req, callback) {
+				get: function(server, req, callback) {
 					_cache1_called = true;
 					// never call back
 				},
 				set: function() {}
 			});
 			handler.registerCache({
-				get: function(req, callback) {
+				get: function(server, req, callback) {
 					assert.isTrue(_cache1_called);
 					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
 				},
@@ -243,8 +272,9 @@ describe('TileRequestHandler', function() {
 			var handler = new TileRequestHandler();
 
 			var _cache_set_calls = 0;
-			var cacheSet = function(req, buffer, headers, callback) {
+			var cacheSet = function(server, req, buffer, headers, callback) {
 				_cache_set_calls++;
+				assert.equal(server, mockServer);
 				assert.equal(req, mockRequest);
 				assert.equal(buffer.toString('utf8'), 'success');
 				assert.deepEqual(headers, {'X-Test-Status': 'success'});
@@ -255,12 +285,12 @@ describe('TileRequestHandler', function() {
 			};
 
 			handler.registerCache({
-				get: function(req, callback) { callback(); },
+				get: function(server, req, callback) { callback(); },
 				set: cacheSet
 			});
 
 			handler.registerCache({
-				get: function(req, callback) { callback(); },
+				get: function(server, req, callback) { callback(); },
 				set: cacheSet
 			});
 
@@ -284,6 +314,8 @@ describe('TileRequestHandler', function() {
 			var handler = new TileRequestHandler();
 			handler.registerProvider({
 				serve: function(server, req, callback) {
+					assert.equal(server, mockServer);
+					assert.equal(req, mockRequest);
 					var _buffer = new Buffer('success', 'utf8');
 					var _headers = {'X-Test-Status': 'success'};
 					callback(null, _buffer, _headers);
