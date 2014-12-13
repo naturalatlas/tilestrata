@@ -81,6 +81,9 @@ Starts accepting requests on the specified port.
 ##### server.registerLayer(init)
 The `init` function will be called immediately with a blank [TileLayer](#tilelayer) instance to be configured.
 
+##### server.getTile(layer, filename, x, y, z, callback)
+Attempts to retrieve a tile from the specified layer (string). The callback will be invoked with three arguments: `err`, `buffer`, and `headers`.
+
 #### [TileLayer](#tilelayer)
 
 ##### layer.setName(name)
