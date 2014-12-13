@@ -1,14 +1,14 @@
-# Tilecomb
+# TileStrata
 
-Tilecomb is a pluggable slippy map tile server that emphasizes code-as-configuration. It's clean, highly tested, and performant. After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js.
+TileStrata is a pluggable slippy map tile server that emphasizes code-as-configuration. It's clean, highly tested, and performant. After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js.
 
 ```sh
-$ npm install tilecomb --save
+$ npm install tilestrata --save
 ```
 
 ### Introduction
 
-Tilecomb consists of three main actors, usually implemented as plugins:
+TileStrata consists of three main actors, usually implemented as plugins:
 
 - *"provider"* – Generates a new tile (e.g mapnik)
 - *"cache"* – Persists a tile for later requests (e.g. filesystem)
@@ -16,32 +16,32 @@ Tilecomb consists of three main actors, usually implemented as plugins:
 
 #### List of Plugins
 
-- [tilecomb-mapnik](#) – Render tiles with [mapnik](http://mapnik.org/).
-- [tilecomb-filesystem](#) – Cache map tiles to disk.
-- [tilecomb-dependency](#) – Fetch tiles from other layers.
-- [tilecomb-libvips](#) – Compress, resize, transcode tiles (jpg, png, webp) using [libvips](https://www.npmjs.com/package/sharp).
+- [tilestrata-mapnik](#) – Render tiles with [mapnik](http://mapnik.org/).
+- [tilestrata-filesystem](#) – Cache map tiles to disk.
+- [tilestrata-dependency](#) – Fetch tiles from other layers.
+- [tilestrata-libvips](#) – Compress, resize, transcode tiles (jpg, png, webp) using [libvips](https://www.npmjs.com/package/sharp).
 
 ## Configuration
 
 ```js
-var tilecomb = require('tilecomb');
-var tilecombServer = tilecomb.createServer();
-tilecombServer.registerLayer(require('./layers/basemap.js'));
-tilecombServer.listen(8080);
+var tilestrata = require('tilestrata');
+var strata = tilestrata.createServer();
+strata.registerLayer(require('./layers/basemap.js'));
+strata.listen(8080);
 ```
 
 With a layer file looking like:
 
 ```js
-var filesystem = require('tilecomb-filesystem');
-var mapnik = require('tilecomb-mapnik');
-var gm = require('tilecomb-gm');
+var filesystem = require('tilestrata-filesystem');
+var mapnik = require('tilestrata-mapnik');
+var libvips = require('tilestrata-libvips');
 
 module.exports = function(layer) {
     layer.setName('basemap');
     layer.registerRoute('tile.png', function(handler) {
         handler.registerCache(filesystem({dir: '/var/lib/tiles/basemap'}));
-        handler.registerProvider(dep({xml: '/path/to/map.xml', scale: 1}));
+        handler.registerProvider(mapnik({xml: '/path/to/map.xml', scale: 1}));
     });
     layer.registerRoute('tile@2x.png', function(handler) {
         handler.registerCache(filesystem({dir: '/var/lib/tiles/basemap'}));
@@ -58,15 +58,15 @@ Once configured and started, tiles can be accessed via:
 
 ### Integrate with [Express.js](http://expressjs.com/) / [Connect](https://github.com/senchalabs/connect)
 
-Tilecomb comes with middleware for Express that makes serving tiles from an existing application really simple, eliminating the need to call `listen` on `tilecombServer`.
+TileStrata comes with middleware for Express that makes serving tiles from an existing application really simple, eliminating the need to call `listen` on `tileserver`.
 
 ```js
-var tilecomb = require('tilecomb');
-var tilecombServer = tilecomb.createServer();
-tilecombServer.registerLayer(require('./layers/basemap.js'));
-tilecombServer.registerLayer(require('./layers/contours.js'));
-app.use(tilecomb.middleware({
-    server: tilecombServer,
+var tilestrata = require('tilestrata');
+var strata = tilestrata.createServer();
+strata.registerLayer(require('./layers/basemap.js'));
+strata.registerLayer(require('./layers/contours.js'));
+app.use(tilestrata.middleware({
+    server: strata,
     prefix: '/maps'
 }));
 ```
@@ -96,7 +96,7 @@ The `init` function will be called immediately with a blank [TileRequestHandler]
 #### [TileRequestHandler](#tilerequesthandler)
 
 ##### handler.setCacheFetchMode(mode)
-Defines how cache fetching happens. The mode can be `"sequential"` or `"race"`. If set to `"race"`, Tilecomb will fetch from both caches simultaneously and return the first that wins.
+Defines how cache fetching happens. The mode can be `"sequential"` or `"race"`. If set to `"race"`, TileStrata will fetch from both caches simultaneously and return the first that wins.
 
 ##### handler.registerProvider(provider)
 Registers a provider that serves as the source of the layer. See ["Writing Providers"](#writing-providers) for more info.
@@ -108,7 +108,7 @@ Registers a cache can be used to fetch/persist the tile file. See ["Writing Cach
 
 A request contains these properties: `x`, `y`, `z`, `layer` (string), and `filename`.
 
-## Extending Tilecomb
+## Extending TileStrata
 
 ### Writing Caches
 
@@ -157,7 +157,7 @@ $ npm test
 
 ## License
 
-Copyright &copy; 2014 [Brian Reavis](https://github.com/brianreavis) & [Contributors](https://github.com/naturalatlas/tilecomb/graphs/contributors)
+Copyright &copy; 2014 [Brian Reavis](https://github.com/brianreavis) & [Contributors](https://github.com/naturalatlas/tilestrata/graphs/contributors)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
 
