@@ -8,8 +8,26 @@ module.exports.createServer = function() {
 };
 
 module.exports.middleware = function(options) {
+	options = options || {};
+	var prefix = (options.prefix || '').replace(/\/$/, '');
+	var prefix_len = prefix.length;
+	var server = options.server;
+	if (!(server instanceof module.exports.TileServer)) {
+		throw new Error('"server" option required, and must be a TileServer instance');
+	}
+
 	return function(req, res, next) {
-		// TODO: this
-		return next();
+		var url = req.url;
+		if (url.substring(0, prefix_len) === prefix) {
+			url = url.substring(prefix_len);
+		} else {
+			return next();
+		}
+		server.serve(req.method, url, function(status, buffer, headers) {
+			if (status === 404) return next();
+			res.writeHead(status, headers);
+			res.write(buffer);
+			res.end();
+		});
 	};
 };

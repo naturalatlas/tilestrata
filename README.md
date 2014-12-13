@@ -74,7 +74,7 @@ app.use(tilestrata.middleware({
 }));
 ```
 
-### API Reference
+## API Reference
 
 #### [TileServer](#tileserver)
 
