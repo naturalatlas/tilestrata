@@ -2,6 +2,8 @@ var TileServer = require('../lib/TileServer.js');
 var TileLayer = require('../lib/TileLayer.js');
 var TileRequest = require('../lib/TileRequest.js');
 var assert = require('chai').assert;
+var http = require('http');
+var version = require('../package.json').version;
 
 describe('TileServer', function() {
 	it('should have "version" property', function() {
@@ -161,6 +163,214 @@ describe('TileServer', function() {
 				assert.equal(buffer.toString('utf8'), 'result');
 				assert.deepEqual(headers, {'X-Test': 'hello'});
 				done();
+			});
+		});
+	});
+	describe('initialize()', function() {
+		it('should initialize each layer provider', function(done) {
+			var _layer1_provider1 = false;
+			var _layer1_provider2 = false;
+			var _layer2_provider1 = false;
+
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('layer1');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({
+						init: function(_server, callback) {
+							_layer1_provider1 = true;
+							assert.equal(_server, server);
+							callback();
+						},
+						serve: function() {}
+					});
+				});
+				layer.registerRoute('tile2.png', function(handler) {
+					handler.registerProvider({
+						init: function(_server, callback) {
+							_layer1_provider2 = true;
+							assert.equal(_server, server);
+							callback();
+						},
+						serve: function() {}
+					});
+				});
+			});
+
+			server.registerLayer(function(layer) {
+				layer.setName('layer2');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({
+						init: function(_server, callback) {
+							_layer2_provider1 = true;
+							assert.equal(_server, server);
+							callback();
+						},
+						serve: function() {}
+					});
+				});
+				layer.registerRoute('tile2.png', function(handler) {
+					handler.registerProvider({
+						serve: function() {}
+					});
+				});
+			});
+
+			server.initialize(function(err) {
+				assert.isFalse(!!err);
+				assert.isTrue(_layer1_provider1);
+				assert.isTrue(_layer1_provider2);
+				assert.isTrue(_layer2_provider1);
+				done();
+			});
+		});
+		it('should initialize each layer transform', function(done) {
+			var _layer1_transform1 = false;
+			var _layer1_transform2 = false;
+			var _layer2_transform1 = false;
+
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('layer1');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({serve: function() {}});
+					handler.registerTransform({
+						init: function(_server, callback) {
+							_layer1_transform1 = true;
+							assert.equal(_server, server);
+							callback();
+						},
+						transform: function() {}
+					});
+				});
+				layer.registerRoute('tile2.png', function(handler) {
+					handler.registerProvider({serve: function() {}});
+					handler.registerTransform({
+						init: function(_server, callback) {
+							_layer1_transform2 = true;
+							assert.equal(_server, server);
+							callback();
+						},
+						transform: function() {}
+					});
+				});
+			});
+
+			server.registerLayer(function(layer) {
+				layer.setName('layer2');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({serve: function() {}});
+					handler.registerTransform({
+						init: function(_server, callback) {
+							_layer2_transform1 = true;
+							assert.equal(_server, server);
+							callback();
+						},
+						transform: function() {}
+					});
+				});
+				layer.registerRoute('tile2.png', function(handler) {
+					handler.registerProvider({
+						serve: function() {}
+					});
+				});
+			});
+
+			server.initialize(function(err) {
+				assert.isFalse(!!err);
+				assert.isTrue(_layer1_transform1);
+				assert.isTrue(_layer1_transform2);
+				assert.isTrue(_layer2_transform1);
+				done();
+			});
+		});
+		it('should initialize each layer cache', function(done) {
+			var _layer1_cache1 = false;
+			var _layer1_cache2 = false;
+			var _layer2_cache1 = false;
+
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('layer1');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({serve: function() {}});
+					handler.registerCache({
+						init: function(_server, callback) {
+							_layer1_cache1 = true;
+							assert.equal(_server, server);
+							callback();
+						},
+						get: function() {},
+						set: function() {}
+					});
+				});
+				layer.registerRoute('tile2.png', function(handler) {
+					handler.registerProvider({serve: function() {}});
+					handler.registerCache({
+						init: function(_server, callback) {
+							_layer1_cache2 = true;
+							assert.equal(_server, server);
+							callback();
+						},
+						get: function() {},
+						set: function() {}
+					});
+				});
+			});
+
+			server.registerLayer(function(layer) {
+				layer.setName('layer2');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({serve: function() {}});
+					handler.registerCache({
+						init: function(_server, callback) {
+							_layer2_cache1 = true;
+							assert.equal(_server, server);
+							callback();
+						},
+						get: function() {},
+						set: function() {}
+					});
+				});
+				layer.registerRoute('tile2.png', function(handler) {
+					handler.registerProvider({serve: function() {}});
+				});
+			});
+
+			server.initialize(function(err) {
+				assert.isFalse(!!err);
+				assert.isTrue(_layer1_cache1);
+				assert.isTrue(_layer1_cache2);
+				assert.isTrue(_layer2_cache1);
+				done();
+			});
+		});
+	});
+	describe('listen()', function() {
+		it('should start server on specified port', function(done) {
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('mylayer');
+				layer.registerRoute('tile.txt', function(handler) {
+					handler.registerProvider({serve: function(server, req, callback) {
+						var message = 'hello x: ' + req.x + ' y: ' + req.y + ' z: ' + req.z;
+						callback(null, new Buffer(message, 'utf8'), {'Content-Type': 'text-plain', 'X-Header': 'test'})
+					}});
+				});
+			});
+			server.listen(8889, function(err) {
+				assert.isFalse(!!err, 'Unexpected error: ' + (err ? (err.message || err) : ''));
+				http.get('http://localhost:8889/mylayer/3/2/1/tile.txt', function(res) {
+					var body = '';
+					res.on('data', function(data) { body += data; });
+					res.on('end', function() {
+						assert.equal(body, 'hello x: 2 y: 1 z: 3');
+						assert.equal(res.headers['content-type'], 'text-plain');
+						assert.equal(res.headers['x-header'], 'test');
+						assert.equal(res.headers['x-powered-by'], 'TileStrata/' + version);
+						done();
+					});
+				});
 			});
 		});
 	});
