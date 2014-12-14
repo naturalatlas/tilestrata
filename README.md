@@ -22,7 +22,7 @@ TileStrata consists of three main actors, usually implemented as plugins:
 - [tilestrata-mapnik](https://github.com/naturalatlas/tilestrata-mapnik) – Render tiles with [mapnik](http://mapnik.org/).
 - [tilestrata-disk](https://github.com/naturalatlas/tilestrata-disk) – Cache map tiles to the filesystem.
 - [tilestrata-dependency](https://github.com/naturalatlas/tilestrata-dependency) – Fetch tiles from other layers.
-- [tilestrata-libvips](https://github.com/naturalatlas/tilestrata-libvips) – Compress, resize, transcode tiles (jpg, png, webp) using [libvips](https://www.npmjs.com/package/sharp).
+- [tilestrata-sharp](https://github.com/naturalatlas/tilestrata-sharp) – Compress, resize, transcode tiles (jpg, png, webp) using [libvips](https://www.npmjs.com/package/sharp).
 
 ## Configuration
 
@@ -37,18 +37,22 @@ With a layer file looking like:
 
 ```js
 var disk = require('tilestrata-disk');
+var sharp = require('tilestrata-sharp');
 var mapnik = require('tilestrata-mapnik');
-var libvips = require('tilestrata-libvips');
+var dependency = require('tilestrata-dependency');
 
 module.exports = function(layer) {
     layer.setName('basemap');
-    layer.registerRoute('tile.png', function(handler) {
-        handler.registerCache(disk({dir: '/var/lib/tiles/basemap'}));
-        handler.registerProvider(mapnik({xml: '/path/to/map.xml', scale: 1}));
-    });
     layer.registerRoute('tile@2x.png', function(handler) {
         handler.registerCache(disk({dir: '/var/lib/tiles/basemap'}));
-        handler.registerTransform(gm({width: 256, height: 256}));
+        handler.registerProvider(mapnik({xml: '/path/to/map.xml', scale: 2, tileSize: 512}));
+    });
+    layer.registerRoute('tile.png', function(handler) {
+        handler.registerCache(disk({dir: '/var/lib/tiles/basemap'}));
+        handler.registerProvider(dependency('basemap', 'tile@2x.png'));
+        handler.registerTransform(sharp(function(image, sharp) {
+            return image.resize(256);
+        }));
     });
 };
 ```
