@@ -3,7 +3,7 @@
 [![Build Status](http://img.shields.io/travis/naturalatlas/tilestrata/master.svg?style=flat)](https://travis-ci.org/naturalatlas/tilestrata)
 [![Coverage Status](http://img.shields.io/coveralls/naturalatlas/tilestrata/master.svg?style=flat)](https://coveralls.io/r/naturalatlas/tilestrata)
 
-TileStrata is a pluggable slippy map tile server that emphasizes code-as-configuration. It's clean, highly tested, and performant. After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js.
+TileStrata is a pluggable "slippy map" tile server that emphasizes code-as-configuration. It's clean, highly tested, and performant. After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js. The primary goal is painless extendability.
 
 ```sh
 $ npm install tilestrata --save
@@ -13,9 +13,9 @@ $ npm install tilestrata --save
 
 TileStrata consists of three main actors, usually implemented as plugins:
 
-- *"provider"* – Generates a new tile (e.g mapnik)
-- *"cache"* – Persists a tile for later requests (e.g. filesystem)
-- *"transform"* – Takes a raw tile and transforms it (e.g. image scaling / compression)
+- [*"provider"*](#writing-providers) – Generates a new tile (e.g mapnik)
+- [*"cache"*](#writing-caches) – Persists a tile for later requests (e.g. filesystem)
+- [*"transform"*](#writing-tranforms) – Takes a raw tile and transforms it (e.g. image scaling / compression)
 
 #### List of Plugins
 
@@ -45,7 +45,11 @@ module.exports = function(layer) {
     layer.setName('basemap');
     layer.registerRoute('tile@2x.png', function(handler) {
         handler.registerCache(disk({dir: '/var/lib/tiles/basemap'}));
-        handler.registerProvider(mapnik({xml: '/path/to/map.xml', scale: 2, tileSize: 512}));
+        handler.registerProvider(mapnik({
+            xml: '/path/to/map.xml',
+            tileSize: 512,
+            scale: 2
+        }));
     });
     layer.registerRoute('tile.png', function(handler) {
         handler.registerCache(disk({dir: '/var/lib/tiles/basemap'}));
@@ -65,7 +69,7 @@ Once configured and started, tiles can be accessed via:
 
 ### Integrate with [Express.js](http://expressjs.com/) / [Connect](https://github.com/senchalabs/connect)
 
-TileStrata comes with middleware for Express that makes serving tiles from an existing application really simple, eliminating the need to call `listen` on `tileserver`.
+TileStrata comes with middleware for Express that makes serving tiles from an existing application really simple, eliminating the need to call `listen` on `strata`.
 
 ```js
 var tilestrata = require('tilestrata');
@@ -125,7 +129,7 @@ A request contains these properties: `x`, `y`, `z`, `layer` (string), and `filen
 
 ### Writing Caches
 
-The `registerCache` method expects an object with two methods: `get`, `set`. Optionally a cache can declare an `init` method that gets called when the server is initializing. If a cache fails (returns an error to the callback), the server will log and ignore the error and attempt to serve the tile from the registered provider.
+The `registerCache` method expects an object with two methods: `get`, `set`. Optionally a cache can declare an `init` method that gets called when the server is initializing. If a cache fails (returns an error to the callback), the server will ignore the error and attempt to serve the tile from the registered provider.
 
 ```js
 module.exports = function(options) {
