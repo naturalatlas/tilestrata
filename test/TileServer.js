@@ -111,6 +111,28 @@ describe('TileServer', function() {
 				done();
 			});
 		});
+		it('should omit body if a HEAD request', function(done) {
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('layer');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({
+						serve: function(_server, _req, callback) {
+							assert.equal(_server, server);
+							assert.instanceOf(_req, TileRequest);
+							assert.equal(_req.filename, 'tile.png');
+							callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+						}
+					});
+				});
+			});
+			server.serve('HEAD', '/layer/1/2/3/tile.png', function(status, buffer, headers) {
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), '');
+				assert.deepEqual(headers, {'X-Test': 'hello'});
+				done();
+			});
+		});
 	});
 	describe('getTile()', function() {
 		it('should return error if tile unavailable', function(done) {
