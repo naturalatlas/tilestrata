@@ -41,7 +41,7 @@ describe('TileServer', function() {
 	describe('serve()', function() {
 		it('should return a 404 status if route not parseable', function(done) {
 			var server = new TileServer();
-			server.serve('GET', '/index.html', function(status, buffer, headers) {
+			server.serve('GET', '/index.html', {}, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
 				assert.deepEqual(headers, {});
@@ -50,7 +50,7 @@ describe('TileServer', function() {
 		});
 		it('should return a 404 status if no handlers found', function(done) {
 			var server = new TileServer();
-			server.serve('GET', '/layer/1/2/3/tile.png', function(status, buffer, headers) {
+			server.serve('GET', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
 				assert.deepEqual(headers, {});
@@ -63,7 +63,7 @@ describe('TileServer', function() {
 				layer.setName('layer');
 				layer.registerRoute('tile.png', function(handler) {});
 			});
-			server.serve('INVALID', '/layer/1/2/3/tile.png', function(status, buffer, headers) {
+			server.serve('INVALID', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
 				assert.equal(status, 501);
 				assert.equal(buffer.toString('utf8'), 'Not implemented');
 				assert.deepEqual(headers, {});
@@ -85,10 +85,15 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			server.serve('GET', '/layer/1/2/3/tile.png', function(status, buffer, headers) {
+			server.serve('GET', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'response');
-				assert.deepEqual(headers, {'X-Test': 'hello'});
+				assert.deepEqual(headers, {
+					'X-Test': 'hello',
+					'X-Powered-By': 'TileStrata/' + version,
+					'Content-Length': 8,
+					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
+				});
 				done();
 			});
 		});
@@ -104,10 +109,67 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			server.serve('GET', '/layer/1/2/3/tile.png', function(status, buffer, headers) {
+			server.serve('GET', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
 				assert.equal(status, 500);
 				assert.equal(buffer.toString('utf8'), 'Something went wrong');
-				assert.deepEqual(headers, {});
+				assert.deepEqual(headers, {
+					'X-Powered-By': 'TileStrata/' + version,
+					'Content-Length': buffer.length
+				});
+				done();
+			});
+		});
+		it('should return a 200 status if If-None-Match does not match ETag', function(done) {
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('layer');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({
+						serve: function(_server, _req, callback) {
+							assert.equal(_server, server);
+							assert.instanceOf(_req, TileRequest);
+							assert.equal(_req.filename, 'tile.png');
+							callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+						}
+					});
+				});
+			});
+			server.serve('GET', '/layer/1/2/3/tile.png', {'If-None-Match': '"1fbOrzaTe+DDuoz+Ciwb/g=="'}, function(status, buffer, headers) {
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'response');
+				assert.deepEqual(headers, {
+					'X-Test': 'hello',
+					'X-Powered-By': 'TileStrata/' + version,
+					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="',
+					'Content-Length': 8
+				});
+				done();
+			});
+		});
+		it('should return a 304 status if If-None-Match matches ETag', function(done) {
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('layer');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({
+						serve: function(_server, _req, callback) {
+							assert.equal(_server, server);
+							assert.instanceOf(_req, TileRequest);
+							assert.equal(_req.filename, 'tile.png');
+							callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+						}
+					});
+				});
+			});
+			server.serve('GET', '/layer/1/2/3/tile.png', {'If-None-Match': '"0fyOrzaTe+DDuoz+Ciwb/g=="'}, function(status, buffer, headers) {
+				assert.equal(status, 304);
+				assert.equal(buffer.toString('utf8'), '');
+				assert.deepEqual(headers, {
+					'X-Test': 'hello',
+					'X-Powered-By': 'TileStrata/' + version,
+					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="',
+					'Content-Length': 8
+				});
 				done();
 			});
 		});
@@ -126,10 +188,15 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			server.serve('HEAD', '/layer/1/2/3/tile.png', function(status, buffer, headers) {
+			server.serve('HEAD', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), '');
-				assert.deepEqual(headers, {'X-Test': 'hello'});
+				assert.deepEqual(headers, {
+					'X-Test': 'hello',
+					'X-Powered-By': 'TileStrata/' + version,
+					'Content-Length': 8,
+					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
+				});
 				done();
 			});
 		});
@@ -183,7 +250,12 @@ describe('TileServer', function() {
 				assert.isNull(err);
 				assert.instanceOf(buffer, Buffer);
 				assert.equal(buffer.toString('utf8'), 'result');
-				assert.deepEqual(headers, {'X-Test': 'hello'});
+				assert.deepEqual(headers, {
+					'X-Test': 'hello',
+					'Content-Length': 6,
+					'X-Powered-By': 'TileStrata/' + version,
+					'ETag': '"tKiEF7PQFw11TGR8MLchag=="'
+				});
 				done();
 			});
 		});
@@ -376,7 +448,10 @@ describe('TileServer', function() {
 				layer.registerRoute('tile.txt', function(handler) {
 					handler.registerProvider({serve: function(server, req, callback) {
 						var message = 'hello x: ' + req.x + ' y: ' + req.y + ' z: ' + req.z;
-						callback(null, new Buffer(message, 'utf8'), {'Content-Type': 'text-plain', 'X-Header': 'test'})
+						callback(null, new Buffer(message, 'utf8'), {
+							'Content-Type': 'text-plain',
+							'X-Header': 'test'
+						})
 					}});
 				});
 			});
@@ -388,6 +463,7 @@ describe('TileServer', function() {
 					res.on('end', function() {
 						assert.equal(body, 'hello x: 2 y: 1 z: 3');
 						assert.equal(res.headers['content-type'], 'text-plain');
+						assert.equal(res.headers['content-length'], 'hello x: 2 y: 1 z: 3'.length);
 						assert.equal(res.headers['x-header'], 'test');
 						assert.equal(res.headers['x-powered-by'], 'TileStrata/' + version);
 						done();

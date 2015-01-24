@@ -4,17 +4,18 @@
   "description": "A pluggable map tile server.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -R tap"
+    "test": "mocha -R list",
+    "test-ci": "mocha -R tap"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/naturalatlas/tilestrata.git"
   },
   "keywords": [
-  	"map",
-  	"tiles",
-  	"server",
-  	"layers"
+    "map",
+    "tiles",
+    "server",
+    "layers"
   ],
   "bugs": {
     "url": "https://github.com/naturalatlas/tilestrata/issues"
@@ -22,6 +23,7 @@
   "homepage": "https://github.com/naturalatlas/tilestrata",
   "dependencies": {
     "async": "^0.9.0",
+    "etag": "^1.5.1",
     "lodash": "^2.4.1",
     "lru-cache": "^2.5.0"
   },

@@ -4,6 +4,7 @@ var TileServer = require('../lib/TileServer.js');
 var TileLayer = require('../lib/TileLayer.js');
 var assert = require('chai').assert;
 var tilestrata = require('../index.js');
+var version = require('../package.json').version;
 
 describe('require("tilestrata")', function() {
 	it('should have "TileServer" property', function() {
@@ -66,7 +67,13 @@ describe('require("tilestrata")', function() {
 				});
 			});
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
-			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {status: 200, headers: {'X-Test':'1','Content-Length': 4}, buffer: new Buffer('tile', 'utf8')}, done);
+			var expected_headers = {
+				'X-Test':'1',
+				'X-Powered-By': 'TileStrata/' + version,
+				'Content-Length': 4,
+				'ETag': '"ExgdjMAeOQv2TJ5LDXp58w=="'
+			};
+			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {status: 200, headers: expected_headers, buffer: new Buffer('tile', 'utf8')}, done);
 		});
 		it('should call next() when route url doesn\'t match', function(done) {
 			var server = new TileServer();

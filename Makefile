@@ -5,7 +5,7 @@ ISTANBUL=node_modules/.bin/istanbul
 COVERALLS=node_modules/.bin/coveralls
 
 test:
-	npm test
+	npm run test-ci
 
 test-ci-coverage:
 	npm install coveralls

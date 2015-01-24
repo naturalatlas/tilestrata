@@ -23,9 +23,8 @@ module.exports.middleware = function(options) {
 		} else {
 			return next();
 		}
-		server.serve(req.method, url, function(status, buffer, headers) {
+		server.serve(req.method, url, req.headers, function(status, buffer, headers) {
 			if (status === 404) return next();
-			headers['Content-Length'] = buffer.length;
 			res.writeHead(status, headers);
 			res.write(buffer);
 			res.end();
