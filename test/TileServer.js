@@ -41,7 +41,7 @@ describe('TileServer', function() {
 	describe('serve()', function() {
 		it('should return a 404 status if route not parseable', function(done) {
 			var server = new TileServer();
-			server.serve('GET', '/index.html', {}, function(status, buffer, headers) {
+			server.serve('GET', '/index.html', {}, false, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
 				assert.deepEqual(headers, {});
@@ -50,7 +50,7 @@ describe('TileServer', function() {
 		});
 		it('should return a 404 status if no handlers found', function(done) {
 			var server = new TileServer();
-			server.serve('GET', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
+			server.serve('GET', '/layer/1/2/3/tile.png', {}, false, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
 				assert.deepEqual(headers, {});
@@ -63,7 +63,7 @@ describe('TileServer', function() {
 				layer.setName('layer');
 				layer.registerRoute('tile.png', function(handler) {});
 			});
-			server.serve('INVALID', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
+			server.serve('INVALID', '/layer/1/2/3/tile.png', {}, false, function(status, buffer, headers) {
 				assert.equal(status, 501);
 				assert.equal(buffer.toString('utf8'), 'Not implemented');
 				assert.deepEqual(headers, {});
@@ -85,7 +85,7 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			server.serve('GET', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
+			server.serve('GET', '/layer/1/2/3/tile.png', {}, false, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'response');
 				assert.deepEqual(headers, {
@@ -109,7 +109,7 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			server.serve('GET', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
+			server.serve('GET', '/layer/1/2/3/tile.png', {}, false, function(status, buffer, headers) {
 				assert.equal(status, 500);
 				assert.equal(buffer.toString('utf8'), 'Something went wrong');
 				assert.deepEqual(headers, {
@@ -134,7 +134,7 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			server.serve('GET', '/layer/1/2/3/tile.png', {'If-None-Match': '"1fbOrzaTe+DDuoz+Ciwb/g=="'}, function(status, buffer, headers) {
+			server.serve('GET', '/layer/1/2/3/tile.png', {'If-None-Match': '"1fbOrzaTe+DDuoz+Ciwb/g=="'}, false, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'response');
 				assert.deepEqual(headers, {
@@ -161,7 +161,7 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			server.serve('GET', '/layer/1/2/3/tile.png', {'If-None-Match': '"0fyOrzaTe+DDuoz+Ciwb/g=="'}, function(status, buffer, headers) {
+			server.serve('GET', '/layer/1/2/3/tile.png', {'If-None-Match': '"0fyOrzaTe+DDuoz+Ciwb/g=="'}, false, function(status, buffer, headers) {
 				assert.equal(status, 304);
 				assert.equal(buffer.toString('utf8'), '');
 				assert.deepEqual(headers, {
@@ -188,7 +188,7 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			server.serve('HEAD', '/layer/1/2/3/tile.png', {}, function(status, buffer, headers) {
+			server.serve('HEAD', '/layer/1/2/3/tile.png', {}, false, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), '');
 				assert.deepEqual(headers, {
@@ -199,6 +199,106 @@ describe('TileServer', function() {
 				});
 				done();
 			});
+		});
+	});
+	describe('respond()', function() {
+		it('should invoke request, response hooks', function(done) {
+			var reqhook1_called = 0;
+			var reqhook2_called = 0;
+			var reshook1_called = 0;
+			var reshook2_called = 0;
+
+			var headWritten = 0;
+			var bodyWritten = 0;
+
+			var mockReq = {method: 'GET', url: '/layer/1/2/3/tile.png', headers: {}};
+			var mockRes = {
+				writeHead: function(status, headers) {
+					headWritten++;
+					assert.equal(status, 200);
+					assert.deepEqual(headers, {
+						'X-Test': 'hello',
+						'X-Powered-By': 'TileStrata/' + version,
+						'X-Res-Hook-1': '1',
+						'X-Res-Hook-2': '1',
+						'Content-Length': 8,
+						'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
+					});
+				},
+				write: function(buffer) {
+					bodyWritten++;
+					assert.equal(buffer.toString('utf8'), 'response');
+				},
+				end: function() {
+					assert.equal(reqhook1_called, 1, 'Request hook 1 called');
+					assert.equal(reqhook2_called, 1, 'Request hook 2 called');
+					assert.equal(reshook1_called, 1, 'Response hook 1 called');
+					assert.equal(reshook2_called, 1, 'Response hook 2 called');
+					assert.equal(headWritten, 1, 'Head written');
+					assert.equal(bodyWritten, 1, 'Body written');
+					done();
+				}
+			};
+
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('layer');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({
+						serve: function(_server, _req, callback) {
+							assert.equal(_server, server);
+							assert.instanceOf(_req, TileRequest);
+							assert.equal(_req.filename, 'tile.png');
+							callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+						}
+					});
+					handler.registerRequestHook({hook: function(_server, _tile, _req, _res, callback) {
+						reqhook1_called++;
+						assert.equal(_server, server);
+						assert.instanceOf(_tile, TileRequest);
+						assert.equal(_req, mockReq);
+						assert.equal(_res, mockRes);
+						callback();
+					}});
+					handler.registerRequestHook({hook: function(_server, _tile, _req, _res, callback) {
+						reqhook2_called++;
+						assert.equal(_server, server);
+						assert.instanceOf(_tile, TileRequest);
+						assert.equal(_req, mockReq);
+						assert.equal(_res, mockRes);
+						callback();
+					}});
+					handler.registerResponseHook({hook: function(_server, _tile, _req, _res, _headers, _buffer, callback) {
+						reshook1_called++;
+						assert.equal(_server, server);
+						assert.instanceOf(_tile, TileRequest);
+						assert.equal(_req, mockReq);
+						assert.equal(_res, mockRes);
+						_headers['X-Res-Hook-1'] = '1';
+						callback();
+					}});
+					handler.registerResponseHook({hook: function(_server, _tile, _req, _res, _headers, _buffer, callback) {
+						reshook2_called++;
+						assert.equal(_server, server);
+						assert.instanceOf(_tile, TileRequest);
+						assert.equal(_req, mockReq);
+						assert.equal(_res, mockRes);
+						assert.instanceOf(_buffer, Buffer);
+						assert.deepEqual(_headers, {
+							'X-Test': 'hello',
+							'X-Powered-By': 'TileStrata/' + version,
+							'X-Res-Hook-1': '1',
+							'Content-Length': 8,
+							'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="',
+							'X-Test':'hello'
+						});
+						_headers['X-Res-Hook-2'] = '1';
+						callback();
+					}});
+				});
+			});
+
+			server.respond(mockReq, mockRes);
 		});
 	});
 	describe('getTile()', function() {

@@ -111,13 +111,17 @@ describe('TileRequestHandler', function() {
 				done();
 			});
 		});
-		it('should call init() on provider, caches, and transforms', function(done) {
+		it('should call init() on provider, caches, transforms, and hooks', function(done) {
 			var server = new TileServer();
 			var handler = new TileRequestHandler();
 			var _cache1_called = false;
 			var _cache2_called = false;
 			var _transform1_called = false;
 			var _transform2_called = false;
+			var _reqhook1_called = false;
+			var _reqhook2_called = false;
+			var _reshook1_called = false;
+			var _reshook2_called = false;
 			var _provider_called = false;
 			handler.registerCache({
 				init: function(_server, callback) {
@@ -161,13 +165,49 @@ describe('TileRequestHandler', function() {
 				},
 				transform: function() {}
 			});
+			handler.registerRequestHook({
+				init: function(_server, callback) {
+					assert.equal(_server, server);
+					_reqhook1_called = true;
+					callback();
+				},
+				hook: function() {}
+			});
+			handler.registerRequestHook({
+				init: function(_server, callback) {
+					assert.equal(_server, server);
+					_reqhook2_called = true;
+					callback();
+				},
+				hook: function() {}
+			});
+			handler.registerResponseHook({
+				init: function(_server, callback) {
+					assert.equal(_server, server);
+					_reshook1_called = true;
+					callback();
+				},
+				hook: function() {}
+			});
+			handler.registerResponseHook({
+				init: function(_server, callback) {
+					assert.equal(_server, server);
+					_reshook2_called = true;
+					callback();
+				},
+				hook: function() {}
+			});
 			handler.initialize(server, function(err) {
 				assert.isNull(err);
-				assert.isTrue(_cache1_called);
-				assert.isTrue(_cache2_called);
-				assert.isTrue(_transform1_called);
-				assert.isTrue(_transform2_called);
-				assert.isTrue(_provider_called);
+				assert.isTrue(_cache1_called, 'Cache 1 initialized');
+				assert.isTrue(_cache2_called, 'Cache 2 initialized');
+				assert.isTrue(_transform1_called, 'Transform 1 initialized');
+				assert.isTrue(_transform2_called, 'Transform 1 initialized');
+				assert.isTrue(_reqhook1_called, 'Request hook 1 initialized');
+				assert.isTrue(_reqhook2_called, 'Request hook 1 initialized');
+				assert.isTrue(_reshook1_called, 'Response hook 1 initialized');
+				assert.isTrue(_reshook2_called, 'Response hook 1 initialized');
+				assert.isTrue(_provider_called, 'Provider initialized');
 				done();
 			});
 		});

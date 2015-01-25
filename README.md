@@ -121,11 +121,34 @@ Registers a cache that can be used to fetch/persist the tile file. See ["Writing
 ##### handler.registerTransform(transform)
 Registers a transform that takes a buffer and set of headers and returns a new buffer + headers. See ["Writing Transforms"](#writing-transforms) for more info. The transforms will be in the same order as they were registered.
 
+##### handler.registerRequestHook(hook)
+Registers a function that is called before a request is processed. Use it to intercept requests for logging, authentication, etc. See ["Writing Request Hooks"](#writing-request-hooks) for more info. 
+
+##### handler.registerResponseHook(hook)
+Registers a function that is called right before a response is sent to the browser. See ["Writing Response Hooks"](#writing-response-hooks) for more info. 
+
 #### [TileRequest](#tilerequest)
 
 A request contains these properties: `x`, `y`, `z`, `layer` (string), and `filename`.
 
 ## Extending TileStrata
+
+### Writing Request Hooks
+
+The `registerRequestHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) instance and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse) instance. This makes it possible to respond without even getting to the tile-serving logic (just don't call the callback).
+
+```js
+module.exports = function(options) {
+    return {
+        init: function(server, callback) {
+            callback(err);
+        },
+        hook: function(server, tile, req, res, callback) {
+            callback();
+        }
+    };
+};
+```
 
 ### Writing Caches
 
@@ -137,10 +160,10 @@ module.exports = function(options) {
         init: function(server, callback) {
             callback(err);
         },
-        get: function(server, req, callback) {
+        get: function(server, tile, callback) {
             callback(err, buffer, headers);
         },
-        set: function(server, req, buffer, headers, callback) {
+        set: function(server, tile, buffer, headers, callback) {
             callback(err);
         }
     };
@@ -157,7 +180,7 @@ module.exports = function(options) {
         init: function(server, callback) {
             callback(err);
         },
-        serve: function(server, req, callback) {
+        serve: function(server, tile, callback) {
             callback(err, buffer, headers);
         }
     };
@@ -174,8 +197,25 @@ module.exports = function(options) {
         init: function(server, callback) {
             callback(err);
         },
-        transform: function(server, req, buffer, headers, callback) {
+        transform: function(server, tile, buffer, headers, callback) {
             callback(err, buffer, headers);
+        }
+    };
+};
+```
+
+### Writing Response Hooks
+
+The `registerResponseHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) instance and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse) instance.
+
+```js
+module.exports = function(options) {
+    return {
+        init: function(server, callback) {
+            callback(err);
+        },
+        hook: function(server, tile, req, res, headers, buffer, callback) {
+            callback();
         }
     };
 };
