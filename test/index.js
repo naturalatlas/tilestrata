@@ -68,6 +68,7 @@ describe('require("tilestrata")', function() {
 				'X-Test':'1',
 				'X-Powered-By': 'TileStrata/' + version,
 				'Content-Length': 4,
+				'Cache-Control': 'max-age=60',
 				'ETag': '"ExgdjMAeOQv2TJ5LDXp58w=="'
 			};
 

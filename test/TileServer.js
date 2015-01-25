@@ -5,6 +5,9 @@ var assert = require('chai').assert;
 var http = require('http');
 var version = require('../package.json').version;
 
+var HEADER_CACHECONTROL = 'max-age=60';
+var HEADER_XPOWEREDBY = 'TileStrata/' + version;
+
 describe('TileServer', function() {
 	it('should have "version" property', function() {
 		var server = new TileServer();
@@ -89,9 +92,10 @@ describe('TileServer', function() {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'response');
 				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
-					'X-Powered-By': 'TileStrata/' + version,
 					'Content-Length': 8,
+					'Cache-Control': HEADER_CACHECONTROL,
 					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
 				});
 				done();
@@ -113,7 +117,7 @@ describe('TileServer', function() {
 				assert.equal(status, 500);
 				assert.equal(buffer.toString('utf8'), 'Something went wrong');
 				assert.deepEqual(headers, {
-					'X-Powered-By': 'TileStrata/' + version,
+					'X-Powered-By': HEADER_XPOWEREDBY,
 					'Content-Length': buffer.length
 				});
 				done();
@@ -138,8 +142,9 @@ describe('TileServer', function() {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'response');
 				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
-					'X-Powered-By': 'TileStrata/' + version,
+					'Cache-Control': HEADER_CACHECONTROL,
 					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="',
 					'Content-Length': 8
 				});
@@ -165,9 +170,10 @@ describe('TileServer', function() {
 				assert.equal(status, 304);
 				assert.equal(buffer.toString('utf8'), '');
 				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
-					'X-Powered-By': 'TileStrata/' + version,
 					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="',
+					'Cache-Control': HEADER_CACHECONTROL,
 					'Content-Length': 8
 				});
 				done();
@@ -192,9 +198,10 @@ describe('TileServer', function() {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), '');
 				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
-					'X-Powered-By': 'TileStrata/' + version,
 					'Content-Length': 8,
+					'Cache-Control': HEADER_CACHECONTROL,
 					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
 				});
 				done();
@@ -217,11 +224,12 @@ describe('TileServer', function() {
 					headWritten++;
 					assert.equal(status, 200);
 					assert.deepEqual(headers, {
+						'X-Powered-By': HEADER_XPOWEREDBY,
 						'X-Test': 'hello',
-						'X-Powered-By': 'TileStrata/' + version,
 						'X-Res-Hook-1': '1',
 						'X-Res-Hook-2': '1',
 						'Content-Length': 8,
+						'Cache-Control': HEADER_CACHECONTROL,
 						'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
 					});
 				},
@@ -285,12 +293,12 @@ describe('TileServer', function() {
 						assert.equal(_res, mockRes);
 						assert.instanceOf(_buffer, Buffer);
 						assert.deepEqual(_headers, {
+							'X-Powered-By': HEADER_XPOWEREDBY,
 							'X-Test': 'hello',
-							'X-Powered-By': 'TileStrata/' + version,
 							'X-Res-Hook-1': '1',
 							'Content-Length': 8,
-							'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="',
-							'X-Test':'hello'
+							'Cache-Control': HEADER_CACHECONTROL,
+							'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
 						});
 						_headers['X-Res-Hook-2'] = '1';
 						callback();
@@ -351,9 +359,10 @@ describe('TileServer', function() {
 				assert.instanceOf(buffer, Buffer);
 				assert.equal(buffer.toString('utf8'), 'result');
 				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
 					'Content-Length': 6,
-					'X-Powered-By': 'TileStrata/' + version,
+					'Cache-Control': HEADER_CACHECONTROL,
 					'ETag': '"tKiEF7PQFw11TGR8MLchag=="'
 				});
 				done();
@@ -565,7 +574,7 @@ describe('TileServer', function() {
 						assert.equal(res.headers['content-type'], 'text-plain');
 						assert.equal(res.headers['content-length'], 'hello x: 2 y: 1 z: 3'.length);
 						assert.equal(res.headers['x-header'], 'test');
-						assert.equal(res.headers['x-powered-by'], 'TileStrata/' + version);
+						assert.equal(res.headers['x-powered-by'], HEADER_XPOWEREDBY);
 						done();
 					});
 				});
