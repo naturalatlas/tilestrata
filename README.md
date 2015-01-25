@@ -16,6 +16,8 @@ TileStrata consists of three main actors, usually implemented as plugins:
 - [*"provider"*](#writing-providers) – Generates a new tile (e.g mapnik)
 - [*"cache"*](#writing-caches) – Persists a tile for later requests (e.g. filesystem)
 - [*"transform"*](#writing-tranforms) – Takes a raw tile and transforms it (e.g. image scaling / compression)
+- [*"request hook"*](#writing-request-hooks) – Called at the very beginning of a tile request.
+- [*"response hook"*](#writing-response-hooks) – Called right before a tile is served to the client.
 
 #### List of Plugins
 
@@ -23,6 +25,7 @@ TileStrata consists of three main actors, usually implemented as plugins:
 - [tilestrata-disk](https://github.com/naturalatlas/tilestrata-disk) – Cache map tiles to the filesystem.
 - [tilestrata-dependency](https://github.com/naturalatlas/tilestrata-dependency) – Fetch tiles from other layers.
 - [tilestrata-sharp](https://github.com/naturalatlas/tilestrata-sharp) – Compress, resize, transcode tiles (jpg, png, webp) using [libvips](https://www.npmjs.com/package/sharp).
+- [tilestrata-headers](https://github.com/naturalatlas/tilestrata-headers) – Set/override response headers.
 
 ## Configuration
 
@@ -135,7 +138,7 @@ A request contains these properties: `x`, `y`, `z`, `layer` (string), and `filen
 
 ### Writing Request Hooks
 
-The `registerRequestHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) instance and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse) instance. This makes it possible to respond without even getting to the tile-serving logic (just don't call the callback).
+The `registerRequestHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). This makes it possible to respond without even getting to the tile-serving logic (just don't call the callback).
 
 ```js
 module.exports = function(options) {
@@ -206,7 +209,7 @@ module.exports = function(options) {
 
 ### Writing Response Hooks
 
-The `registerResponseHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) instance and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse) instance.
+The `registerResponseHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse).
 
 ```js
 module.exports = function(options) {
