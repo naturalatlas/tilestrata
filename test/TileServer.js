@@ -56,7 +56,10 @@ describe('TileServer', function() {
 			server.serve('GET', '/layer/1/2/3/tile.png', {}, false, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
-				assert.deepEqual(headers, {});
+				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
+					'Content-Length': 9
+				});
 				done();
 			});
 		});
@@ -69,7 +72,10 @@ describe('TileServer', function() {
 			server.serve('INVALID', '/layer/1/2/3/tile.png', {}, false, function(status, buffer, headers) {
 				assert.equal(status, 501);
 				assert.equal(buffer.toString('utf8'), 'Not implemented');
-				assert.deepEqual(headers, {});
+				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
+					'Content-Length': 15
+				});
 				done();
 			});
 		});
@@ -97,6 +103,33 @@ describe('TileServer', function() {
 					'Content-Length': 8,
 					'Cache-Control': HEADER_CACHECONTROL,
 					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
+				});
+				done();
+			});
+		});
+		it('should return a 500 status if a hook fails', function(done) {
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('layer');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({
+						serve: function(_server, _req, callback) {
+							callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+						}
+					});
+					handler.registerResponseHook({
+						hook: function(server, tile, req, res, headers, buffer, callback) {
+							callback(new Error('The hook failed'));
+						}
+					});
+				});
+			});
+			server.serve('GET', '/layer/1/2/3/tile.png', {}, {req: {}, res: {}}, function(status, buffer, headers) {
+				assert.equal(status, 500);
+				assert.equal(buffer.toString('utf8'), 'The hook failed');
+				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
+					'Content-Length': buffer.length
 				});
 				done();
 			});
