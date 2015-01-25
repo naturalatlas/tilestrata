@@ -199,7 +199,7 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			server.serve('GET', '/layer/1/2/3/tile.png', {'If-None-Match': '"0fyOrzaTe+DDuoz+Ciwb/g=="'}, false, function(status, buffer, headers) {
+			server.serve('GET', '/layer/1/2/3/tile.png', {'if-none-match': '"0fyOrzaTe+DDuoz+Ciwb/g=="'}, false, function(status, buffer, headers) {
 				assert.equal(status, 304);
 				assert.equal(buffer.toString('utf8'), '');
 				assert.deepEqual(headers, {
