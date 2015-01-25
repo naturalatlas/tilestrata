@@ -102,6 +102,54 @@ describe('TileRequestHandler', function() {
 			assert.deepEqual(handler.caches, [_cache1, _cache2]);
 		});
 	});
+	describe('registerRequestHook()', function() {
+		it('should throw if passed invalid value', function() {
+			assert.throws(function() {
+				var handler = new TileRequestHandler();
+				handler.registerRequestHook(null);
+			}, /Falsy value passed/);
+			assert.throws(function() {
+				var handler = new TileRequestHandler();
+				handler.registerRequestHook({set: function() {}});
+			}, /Attempted to register a request hook with no hook/);
+			assert.throws(function() {
+				var handler = new TileRequestHandler();
+				handler.registerRequestHook({get: function() {}});
+			}, /Attempted to register a request hook with no hook/);
+		});
+		it('should operate normally', function() {
+			var handler = new TileRequestHandler();
+			var _hook1 = {hook: function() {}};
+			var _hook2 = {hook: function() {}};
+			handler.registerRequestHook(_hook1);
+			handler.registerRequestHook(_hook2);
+			assert.deepEqual(handler.requestHooks, [_hook1, _hook2]);
+		});
+	});
+	describe('registerResponseHook()', function() {
+		it('should throw if passed invalid value', function() {
+			assert.throws(function() {
+				var handler = new TileRequestHandler();
+				handler.registerResponseHook(null);
+			}, /Falsy value passed/);
+			assert.throws(function() {
+				var handler = new TileRequestHandler();
+				handler.registerResponseHook({set: function() {}});
+			}, /Attempted to register a response hook with no hook/);
+			assert.throws(function() {
+				var handler = new TileRequestHandler();
+				handler.registerResponseHook({get: function() {}});
+			}, /Attempted to register a response hook with no hook/);
+		});
+		it('should operate normally', function() {
+			var handler = new TileRequestHandler();
+			var _hook1 = {hook: function() {}};
+			var _hook2 = {hook: function() {}};
+			handler.registerResponseHook(_hook1);
+			handler.registerResponseHook(_hook2);
+			assert.deepEqual(handler.responseHooks, [_hook1, _hook2]);
+		});
+	});
 	describe('initialize()', function() {
 		it('should handle no provider / no caches gracefully', function(done) {
 			var server = new TileServer();
