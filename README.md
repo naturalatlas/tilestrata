@@ -85,6 +85,19 @@ app.use(tilestrata.middleware({
 }));
 ```
 
+## Usage Notes
+
+### Rebuilding the Tile Cache
+
+If you update your map styles or data, you'll probably want to update your tiles. Rather than dump of them at once and bring your tile server to a crawl, progressively rebuild the cache by requesting tiles with the `X-TileStrata-SkipCache` header. [TileMantle](https://github.com/naturalatlas/tilemantle) makes this process easy:
+
+```
+npm install -g tilemantle
+tilemantle http://myhost.com/mylayer/{z}/{x}/{y}/t.png \
+    -p 44.9457507,-109.5939822 -b 30mi -z 10-14 \
+    -H "X-TileStrata-SkipCache:1"
+```
+
 ## API Reference
 
 #### [TileServer](#tileserver)
@@ -132,7 +145,7 @@ Registers a function that is called right before a response is sent to the brows
 
 #### [TileRequest](#tilerequest)
 
-A request contains these properties: `x`, `y`, `z`, `layer` (string), and `filename`.
+A request contains these properties: `x`, `y`, `z`, `layer` (string), `filename`, and `headers`.
 
 ## Extending TileStrata
 

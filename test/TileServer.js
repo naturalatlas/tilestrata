@@ -79,6 +79,23 @@ describe('TileServer', function() {
 				done();
 			});
 		});
+		it('should pass through headers to handler', function(done) {
+			var server = new TileServer();
+			server.registerLayer(function(layer) {
+				layer.setName('layer');
+				layer.registerRoute('tile.png', function(handler) {
+					handler.registerProvider({
+						serve: function(_server, _req, callback) {
+							assert.deepEqual(_req.headers, {'x-tilestrata-skipcache':'1'});
+							callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+						}
+					});
+				});
+			});
+			server.serve('GET', '/layer/1/2/3/tile.png', {'x-tilestrata-skipcache':'1'}, false, function(status, buffer, headers) {
+				done();
+			});
+		});
 		it('should return a 200 status if layer handler succeeds', function(done) {
 			var server = new TileServer();
 			server.registerLayer(function(layer) {

@@ -624,5 +624,43 @@ describe('TileRequestHandler', function() {
 			handler.GET(mockServer, req1, handleResponse);
 			handler.GET(mockServer, req2, handleResponse);
 		});
+		it('should skip cache get if "X-TileStrata-SkipCache" header present', function(done) {
+			var mockServer = new TileServer();
+			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': '1'});
+			var handler = new TileRequestHandler();
+
+			var _cache_get_calls = 0;
+			var _cache_set_calls = 0;
+
+			handler.registerCache({
+				get: function(server, req, callback) {
+					_cache_get_calls++;
+					callback();
+				},
+				set: function(server, req, buffer, headers, callback) {
+					_cache_set_calls++;
+					callback();
+					if (_cache_set_calls === 1) {
+						setImmediate(done);
+					}
+				}
+			});
+
+			handler.registerProvider({
+				serve: function(server, req, callback) {
+					var _buffer = new Buffer('success', 'utf8');
+					var _headers = {'X-Test-Status': 'success'};
+					callback(null, _buffer, _headers);
+				}
+			});
+
+			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
+				assert.equal(_cache_get_calls, 0);
+				assert.equal(_cache_set_calls, 0);
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'success');
+				assert.deepEqual(headers, {'X-Test-Status': 'success'});
+			});
+		});
 	});
 });

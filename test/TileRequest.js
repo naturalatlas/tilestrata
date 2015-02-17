@@ -11,7 +11,8 @@ describe('TileRequest', function() {
 			assert.deepEqual(result, {
 				layer: 'lyr',
 				filename: 'tile@2x.png',
-				z: 1, x: 2, y: 3
+				z: 1, x: 2, y: 3,
+				headers: {}
 			});
 
 			result = TileRequest.parse('lyr/1/2/3/tile@2x.png');
@@ -19,7 +20,8 @@ describe('TileRequest', function() {
 			assert.deepEqual(result, {
 				layer: 'lyr',
 				filename: 'tile@2x.png',
-				z: 1, x: 2, y: 3
+				z: 1, x: 2, y: 3,
+				headers: {}
 			});
 
 			result = TileRequest.parse('lyr1/1/2/3/tile@2x.png?query=1&test=2');
@@ -27,7 +29,17 @@ describe('TileRequest', function() {
 			assert.deepEqual(result, {
 				layer: 'lyr1',
 				filename: 'tile@2x.png',
-				z: 1, x: 2, y: 3
+				z: 1, x: 2, y: 3,
+				headers: {}
+			});
+
+			result = TileRequest.parse('lyr1/1/2/3/tile@2x.png?query=1&test=2', {'x-tilestrata-skipcache': '1'});
+			assert.instanceOf(result, TileRequest);
+			assert.deepEqual(result, {
+				layer: 'lyr1',
+				filename: 'tile@2x.png',
+				z: 1, x: 2, y: 3,
+				headers: {'x-tilestrata-skipcache': '1'}
 			});
 		});
 		it('should return undefined when unable to parse', function() {
