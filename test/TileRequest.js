@@ -6,41 +6,40 @@ describe('TileRequest', function() {
 		it('should operate normally', function() {
 			var result;
 
+			// leading slash
 			result = TileRequest.parse('/lyr/1/2/3/tile@2x.png');
 			assert.instanceOf(result, TileRequest);
-			assert.deepEqual(result, {
-				layer: 'lyr',
-				filename: 'tile@2x.png',
-				z: 1, x: 2, y: 3,
-				headers: {}
-			});
+			assert.equal(result.layer, 'lyr');
+			assert.equal(result.filename, 'tile@2x.png');
+			assert.equal(result.z, 1),
+			assert.equal(result.x, 2),
+			assert.equal(result.y, 3),
+			assert.deepEqual(result.headers, {});
 
+			// no leading slash
 			result = TileRequest.parse('lyr/1/2/3/tile@2x.png');
 			assert.instanceOf(result, TileRequest);
-			assert.deepEqual(result, {
-				layer: 'lyr',
-				filename: 'tile@2x.png',
-				z: 1, x: 2, y: 3,
-				headers: {}
-			});
+			assert.equal(result.layer, 'lyr');
+			assert.equal(result.filename, 'tile@2x.png');
+			assert.equal(result.z, 1),
+			assert.equal(result.x, 2),
+			assert.equal(result.y, 3),
+			assert.deepEqual(result.headers, {});
 
+			// query string
 			result = TileRequest.parse('lyr1/1/2/3/tile@2x.png?query=1&test=2');
 			assert.instanceOf(result, TileRequest);
-			assert.deepEqual(result, {
-				layer: 'lyr1',
-				filename: 'tile@2x.png',
-				z: 1, x: 2, y: 3,
-				headers: {}
-			});
+			assert.equal(result.layer, 'lyr1');
+			assert.equal(result.filename, 'tile@2x.png');
+			assert.equal(result.z, 1),
+			assert.equal(result.x, 2),
+			assert.equal(result.y, 3),
+			assert.deepEqual(result.headers, {});
 
+			// headers
 			result = TileRequest.parse('lyr1/1/2/3/tile@2x.png?query=1&test=2', {'x-tilestrata-skipcache': '1'});
 			assert.instanceOf(result, TileRequest);
-			assert.deepEqual(result, {
-				layer: 'lyr1',
-				filename: 'tile@2x.png',
-				z: 1, x: 2, y: 3,
-				headers: {'x-tilestrata-skipcache': '1'}
-			});
+			assert.deepEqual(result.headers, {'x-tilestrata-skipcache': '1'});
 		});
 		it('should return undefined when unable to parse', function() {
 			assert.isUndefined(TileRequest.parse());
@@ -49,6 +48,23 @@ describe('TileRequest', function() {
 			assert.isUndefined(TileRequest.parse('/a/1/2/3.2/t.png'));
 			assert.isUndefined(TileRequest.parse('/a/1.2/2/3/t.png'));
 			assert.isUndefined(TileRequest.parse('/a/1/2.4/3/t.png'));
+		});
+	});
+	describe('clone()', function() {
+		it('should return different, but identical, instance', function() {
+			var original = TileRequest.parse('lyr1/1/2/3/tile@2x.png?query=1&test=2', {'x-tilestrata-skipcache': '1'});
+
+			var clone = original.clone();
+			assert.instanceOf(clone, TileRequest);
+			assert.notEqual(clone, original);
+			assert.equal(clone.layer, 'lyr1');
+			assert.equal(clone.filename, 'tile@2x.png');
+			assert.equal(clone.z, 1),
+			assert.equal(clone.x, 2),
+			assert.equal(clone.y, 3),
+
+			assert.notEqual(clone.headers, original.headers);
+			assert.deepEqual(clone.headers, {'x-tilestrata-skipcache': '1'});
 		});
 	});
 });
