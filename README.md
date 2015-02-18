@@ -145,7 +145,10 @@ Registers a function that is called right before a response is sent to the brows
 
 #### [TileRequest](#tilerequest)
 
-A request contains these properties: `x`, `y`, `z`, `layer` (string), `filename`, and `headers`.
+A request contains these properties: `x`, `y`, `z`, `layer` (string), `filename`, `method`, and `headers`.
+
+##### tile.clone()
+Returns an identical copy of the tile request that's safe to mutate.
 
 ## Extending TileStrata
 
