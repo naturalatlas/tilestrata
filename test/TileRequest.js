@@ -14,7 +14,7 @@ describe('TileRequest', function() {
 			assert.equal(result.z, 1);
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
-			assert.equal(result.method, 'HEAD');
+			assert.equal(result.method, 'GET');
 			assert.deepEqual(result.headers, {});
 
 			// no leading slash
@@ -25,7 +25,7 @@ describe('TileRequest', function() {
 			assert.equal(result.z, 1);
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
-			assert.equal(result.method, 'HEAD');
+			assert.equal(result.method, 'GET');
 			assert.deepEqual(result.headers, {});
 
 			// query string
@@ -36,7 +36,7 @@ describe('TileRequest', function() {
 			assert.equal(result.z, 1);
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
-			assert.equal(result.method, 'HEAD');
+			assert.equal(result.method, 'GET');
 			assert.deepEqual(result.headers, {});
 
 			// headers
@@ -45,9 +45,9 @@ describe('TileRequest', function() {
 			assert.deepEqual(result.headers, {'x-tilestrata-skipcache': '1'});
 
 			// method
-			result = TileRequest.parse('lyr1/1/2/3/tile@2x.png?query=1&test=2', {'x-tilestrata-skipcache': '1'}, 'GET');
+			result = TileRequest.parse('lyr1/1/2/3/tile@2x.png?query=1&test=2', {'x-tilestrata-skipcache': '1'}, 'HEAD');
 			assert.instanceOf(result, TileRequest);
-			assert.equal(result.method, 'GET');
+			assert.equal(result.method, 'HEAD');
 		});
 		it('should return undefined when unable to parse', function() {
 			assert.isUndefined(TileRequest.parse());

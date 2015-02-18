@@ -1,6 +1,6 @@
 {
   "name": "tilestrata",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A pluggable map tile server.",
   "main": "index.js",
   "scripts": {
