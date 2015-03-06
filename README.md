@@ -102,8 +102,8 @@ tilemantle http://myhost.com/mylayer/{z}/{x}/{y}/t.png \
 
 #### [TileServer](#tileserver)
 
-##### server.listen(port, [callback])
-Starts accepting requests on the specified port.
+##### server.listen(port, [hostname], [callback])
+Starts accepting requests on the specified port. The arguments to this method are exactly identical to node's http.Server [listen()](http://nodejs.org/api/http.html#http_server_listen_port_hostname_backlog_callback) method.
 
 ##### server.registerLayer(init)
 The `init` function will be called immediately with a blank [TileLayer](#tilelayer) instance to be configured.
@@ -250,7 +250,7 @@ $ npm test
 
 ## License
 
-Copyright &copy; 2014 [Brian Reavis](https://github.com/brianreavis) & [Contributors](https://github.com/naturalatlas/tilestrata/graphs/contributors)
+Copyright &copy; 2014 [Natural Atlas, Inc.](https://github.com/naturalatlas) & [Contributors](https://github.com/naturalatlas/tilestrata/graphs/contributors)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
 
