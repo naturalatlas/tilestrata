@@ -152,7 +152,10 @@ describe('TileServer', function() {
 				assert.equal(buffer.toString('utf8'), 'The hook failed');
 				assert.deepEqual(headers, {
 					'X-Powered-By': HEADER_XPOWEREDBY,
-					'Content-Length': buffer.length
+					'Content-Length': buffer.length,
+					'Cache-Control': 'no-cache, no-store, must-revalidate',
+					'Expires': '0',
+					'Pragma': 'no-cache'
 				});
 				done();
 			});
