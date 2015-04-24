@@ -27,6 +27,7 @@ TileStrata consists of three main actors, usually implemented as plugins:
 - [tilestrata-sharp](https://github.com/naturalatlas/tilestrata-sharp) – Compress, resize, transcode tiles (jpg, png, webp) using [libvips](https://www.npmjs.com/package/sharp).
 - [tilestrata-gm](https://github.com/naturalatlas/tilestrata-gm) – Perform all sorts of image operations on tiles using [GraphicsMagick](https://www.npmjs.com/package/gm).
 - [tilestrata-headers](https://github.com/naturalatlas/tilestrata-headers) – Set/override response headers.
+- [tilestrata-blend](https://github.com/naturalatlas/tilestrata-blend) – Stack multiple layers together.
 
 ## Configuration
 
