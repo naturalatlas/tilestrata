@@ -227,7 +227,7 @@ module.exports = function(options) {
 
 ### Writing Response Hooks
 
-The `registerResponseHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse).
+The `registerResponseHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). The "result" argument contains three properties: `headers`, `buffer`, and `status` - each of which can be modified to affect the final response.
 
 ```js
 module.exports = function(options) {
@@ -235,7 +235,7 @@ module.exports = function(options) {
         init: function(server, callback) {
             callback(err);
         },
-        hook: function(server, tile, req, res, headers, buffer, callback) {
+        hook: function(server, tile, req, res, result, callback) {
             callback();
         }
     };

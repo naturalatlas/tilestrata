@@ -140,7 +140,7 @@ describe('TileServer', function() {
 						}
 					});
 					handler.registerResponseHook({
-						hook: function(server, tile, req, res, headers, buffer, callback) {
+						hook: function(server, tile, req, res, result, callback) {
 							callback(new Error('The hook failed'));
 						}
 					});
@@ -292,14 +292,14 @@ describe('TileServer', function() {
 						'X-Test': 'hello',
 						'X-Res-Hook-1': '1',
 						'X-Res-Hook-2': '1',
-						'Content-Length': 8,
+						'Content-Length': 17,
 						'Cache-Control': HEADER_CACHECONTROL,
-						'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
+						'ETag': '"miLcq2wD06H4X7CEVf44aA=="'
 					});
 				},
 				write: function(buffer) {
 					bodyWritten++;
-					assert.equal(buffer.toString('utf8'), 'response');
+					assert.equal(buffer.toString('utf8'), 'response-modified');
 				},
 				end: function() {
 					assert.equal(reqhook1_called, 1, 'Request hook 1 called');
@@ -340,31 +340,30 @@ describe('TileServer', function() {
 						assert.equal(_res, mockRes);
 						callback();
 					}});
-					handler.registerResponseHook({hook: function(_server, _tile, _req, _res, _headers, _buffer, callback) {
+					handler.registerResponseHook({hook: function(_server, _tile, _req, _res, _result, callback) {
 						reshook1_called++;
 						assert.equal(_server, server);
 						assert.instanceOf(_tile, TileRequest);
 						assert.equal(_req, mockReq);
 						assert.equal(_res, mockRes);
-						_headers['X-Res-Hook-1'] = '1';
+						_result.headers['X-Res-Hook-1'] = '1';
 						callback();
 					}});
-					handler.registerResponseHook({hook: function(_server, _tile, _req, _res, _headers, _buffer, callback) {
+					handler.registerResponseHook({hook: function(_server, _tile, _req, _res, _result, callback) {
 						reshook2_called++;
 						assert.equal(_server, server);
 						assert.instanceOf(_tile, TileRequest);
 						assert.equal(_req, mockReq);
 						assert.equal(_res, mockRes);
-						assert.instanceOf(_buffer, Buffer);
-						assert.deepEqual(_headers, {
+						assert.instanceOf(_result.buffer, Buffer);
+						assert.deepEqual(_result.headers, {
 							'X-Powered-By': HEADER_XPOWEREDBY,
 							'X-Test': 'hello',
 							'X-Res-Hook-1': '1',
-							'Content-Length': 8,
-							'Cache-Control': HEADER_CACHECONTROL,
-							'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
+							'Cache-Control': HEADER_CACHECONTROL
 						});
-						_headers['X-Res-Hook-2'] = '1';
+						_result.headers['X-Res-Hook-2'] = '1';
+						_result.buffer = new Buffer(_result.buffer.toString('utf8') + '-modified');
 						callback();
 					}});
 				});

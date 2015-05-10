@@ -87,11 +87,15 @@ describe('require("tilestrata")', function() {
 						}
 					});
 					handler.registerResponseHook({
-						hook: function(_server, _tile, _req, _res, _headers, _buffer, callback) {
+						hook: function(_server, _tile, _req, _res, _result, callback) {
 							reshook_called = true;
 							assert.equal(_server, server);
-							assert.deepEqual(_headers, expected_headers);
-							assert.instanceOf(_buffer, Buffer);
+							assert.deepEqual(_result.headers, {
+								'X-Test':'1',
+								'X-Powered-By': 'TileStrata/' + version,
+								'Cache-Control': 'max-age=60'
+							});
+							assert.instanceOf(_result.buffer, Buffer);
 							assert.instanceOf(_tile, TileRequest);
 							assert.equal(_req.url, '/tiles/basemap/3/2/1/file.txt');
 							assert.isFunction(_res.writeHead);
