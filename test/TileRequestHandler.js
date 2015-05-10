@@ -4,157 +4,209 @@ var TileRequestHandler = require('../lib/TileRequestHandler.js');
 var assert = require('chai').assert;
 
 describe('TileRequestHandler', function() {
-	it('should default cacheFetchMode to "sequential"', function() {
-		var handler = new TileRequestHandler();
-		assert.equal(handler.cacheFetchMode, 'sequential');
-	});
-	it('should have a "transforms" property', function() {
-		var handler = new TileRequestHandler();
-		assert.deepEqual(handler.transforms, []);
-	});
-	it('should have a "caches" property', function() {
-		var handler = new TileRequestHandler();
-		assert.deepEqual(handler.caches, []);
-	});
-	it('should have a "provider" property', function() {
-		var handler = new TileRequestHandler();
-		assert.deepEqual(handler.provider, null);
-	});
-	describe('setCacheFetchMode()', function() {
-		it('should set cacheFetchMode property', function() {
-			var handler = new TileRequestHandler();
-			handler.setCacheFetchMode('race');
-			assert.equal(handler.cacheFetchMode, 'race');
-		});
-		it('should detect invalid values', function() {
-			var handler = new TileRequestHandler();
+	describe('constructor', function() {
+		it('should detect invalid cacheFetchMode values', function() {
 			assert.throws(function() {
-				handler.setCacheFetchMode('awawf');
+				new TileRequestHandler({cacheFetchMode: 'awawf'});
 			}, /Invalid cache fetch mode/);
 		});
+		it('should default cacheFetchMode to "sequential"', function() {
+			var handler = new TileRequestHandler();
+			assert.equal(handler.cacheFetchMode, 'sequential');
+		});
+		it('should set "transforms" property', function() {
+			var handler = new TileRequestHandler();
+			assert.deepEqual(handler.transforms, []);
+		});
+		it('should set "caches" property', function() {
+			var handler = new TileRequestHandler();
+			assert.deepEqual(handler.caches, []);
+		});
+		it('should set "provider" property', function() {
+			var handler = new TileRequestHandler();
+			assert.deepEqual(handler.provider, null);
+		});
 	});
-	describe('registerProvider()', function() {
+	describe('use()', function() {
+		it('should allow chaining', function() {
+			var handler = new TileRequestHandler();
+			var _plugin = {serve: function() {}};
+			var returned = handler.use(_plugin);
+			assert.equal(returned, handler);
+		});
+		it('should recognize providers', function() {
+			var handler = new TileRequestHandler();
+			var _plugin = {serve: function() {}};
+			handler.use(_plugin);
+			assert.equal(handler.provider, _plugin);
+		});
+		it('should recognize caches', function() {
+			var handler = new TileRequestHandler();
+			var _plugin = {get: function() {}, set: function() {}};
+			handler.use(_plugin);
+			assert.equal(handler.caches[0], _plugin);
+		});
+		it('should recognize transforms', function() {
+			var handler = new TileRequestHandler();
+			var _plugin = {transform: function() {}};
+			handler.use(_plugin);
+			assert.equal(handler.transforms[0], _plugin);
+		});
+		it('should recognize request hooks', function() {
+			var handler = new TileRequestHandler();
+			var _plugin = {reqhook: function() {}};
+			handler.use(_plugin);
+			assert.equal(handler.requestHooks[0], _plugin);
+		});
+		it('should recognize response hooks', function() {
+			var handler = new TileRequestHandler();
+			var _plugin = {reshook: function() {}};
+			handler.use(_plugin);
+			assert.equal(handler.responseHooks[0], _plugin);
+		});
+		it('should accept arrays', function() {
+			var handler = new TileRequestHandler();
+			var _transform = {transform: function() {}};
+			var _provider = {serve: function() {}};
+			var _cache = {get: function() {}, set: function() {}};
+			var _reqhook = {reqhook: function() {}};
+			var _reshook = {reshook: function() {}};
+			handler.use([
+				[[_transform]],
+				_provider,
+				_cache,
+				_reqhook,
+				_reshook
+			]);
+			assert.equal(handler.provider, _provider);
+			assert.equal(handler.caches[0], _cache);
+			assert.equal(handler.transforms[0], _transform);
+			assert.equal(handler.requestHooks[0], _reqhook);
+			assert.equal(handler.responseHooks[0], _reshook);
+		});
+	});
+	describe('_registerProvider()', function() {
 		it('should throw if passed invalid value', function() {
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerProvider(null);
+				handler._registerProvider(null);
 			}, /Falsy value passed/);
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerProvider({});
+				handler._registerProvider({});
 			}, /Attempted to register a provider with no serve/);
 		});
 		it('should throw if provider already set', function() {
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerProvider({serve: function() {}});
-				handler.registerProvider({serve: function() {}});
+				handler._registerProvider({serve: function() {}});
+				handler._registerProvider({serve: function() {}});
 			}, /provider already registered/);
 		});
 		it('should operate normally', function() {
 			var handler = new TileRequestHandler();
 			var _provider = {serve: function() {}};
-			handler.registerProvider(_provider);
+			handler._registerProvider(_provider);
 			assert.equal(handler.provider, _provider);
 		});
 	});
-	describe('registerTransform()', function() {
+	describe('_registerTransform()', function() {
 		it('should throw if passed invalid value', function() {
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerTransform(null);
+				handler._registerTransform(null);
 			}, /Falsy value passed/);
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerTransform({});
+				handler._registerTransform({});
 			}, /Attempted to register a transform with no transform/);
 		});
 		it('should operate normally', function() {
 			var handler = new TileRequestHandler();
 			var _transform1 = {transform: function() {}};
 			var _transform2 = {transform: function() {}};
-			handler.registerTransform(_transform1);
-			handler.registerTransform(_transform2);
+			handler._registerTransform(_transform1);
+			handler._registerTransform(_transform2);
 			assert.deepEqual(handler.transforms, [_transform1, _transform2]);
 		});
 	});
-	describe('registerCache()', function() {
+	describe('_registerCache()', function() {
 		it('should throw if passed invalid value', function() {
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerCache(null);
+				handler._registerCache(null);
 			}, /Falsy value passed/);
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerCache({set: function() {}});
+				handler._registerCache({set: function() {}});
 			}, /Attempted to register a cache with no get/);
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerCache({get: function() {}});
+				handler._registerCache({get: function() {}});
 			}, /Attempted to register a cache with no set/);
 		});
 		it('should operate normally', function() {
 			var handler = new TileRequestHandler();
 			var _cache1 = {get: function() {}, set: function() {}};
 			var _cache2 = {get: function() {}, set: function() {}};
-			handler.registerCache(_cache1);
-			handler.registerCache(_cache2);
+			handler._registerCache(_cache1);
+			handler._registerCache(_cache2);
 			assert.deepEqual(handler.caches, [_cache1, _cache2]);
 		});
 	});
-	describe('registerRequestHook()', function() {
+	describe('_registerRequestHook()', function() {
 		it('should throw if passed invalid value', function() {
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerRequestHook(null);
+				handler._registerRequestHook(null);
 			}, /Falsy value passed/);
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerRequestHook({set: function() {}});
-			}, /Attempted to register a request hook with no hook/);
+				handler._registerRequestHook({set: function() {}});
+			}, /Attempted to register a request hook with no reqhook/);
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerRequestHook({get: function() {}});
-			}, /Attempted to register a request hook with no hook/);
+				handler._registerRequestHook({get: function() {}});
+			}, /Attempted to register a request hook with no reqhook/);
 		});
 		it('should operate normally', function() {
 			var handler = new TileRequestHandler();
-			var _hook1 = {hook: function() {}};
-			var _hook2 = {hook: function() {}};
-			handler.registerRequestHook(_hook1);
-			handler.registerRequestHook(_hook2);
+			var _hook1 = {reqhook: function() {}};
+			var _hook2 = {reqhook: function() {}};
+			handler._registerRequestHook(_hook1);
+			handler._registerRequestHook(_hook2);
 			assert.deepEqual(handler.requestHooks, [_hook1, _hook2]);
 		});
 	});
-	describe('registerResponseHook()', function() {
+	describe('_registerResponseHook()', function() {
 		it('should throw if passed invalid value', function() {
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerResponseHook(null);
+				handler._registerResponseHook(null);
 			}, /Falsy value passed/);
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerResponseHook({set: function() {}});
-			}, /Attempted to register a response hook with no hook/);
+				handler._registerResponseHook({set: function() {}});
+			}, /Attempted to register a response hook with no reshook/);
 			assert.throws(function() {
 				var handler = new TileRequestHandler();
-				handler.registerResponseHook({get: function() {}});
-			}, /Attempted to register a response hook with no hook/);
+				handler._registerResponseHook({get: function() {}});
+			}, /Attempted to register a response hook with no reshook/);
 		});
 		it('should operate normally', function() {
 			var handler = new TileRequestHandler();
-			var _hook1 = {hook: function() {}};
-			var _hook2 = {hook: function() {}};
-			handler.registerResponseHook(_hook1);
-			handler.registerResponseHook(_hook2);
+			var _hook1 = {reshook: function() {}};
+			var _hook2 = {reshook: function() {}};
+			handler._registerResponseHook(_hook1);
+			handler._registerResponseHook(_hook2);
 			assert.deepEqual(handler.responseHooks, [_hook1, _hook2]);
 		});
 	});
-	describe('initialize()', function() {
+	describe('_initialize()', function() {
 		it('should handle no provider / no caches gracefully', function(done) {
 			var server = new TileServer();
 			var handler = new TileRequestHandler();
-			handler.initialize(server, function(err) {
+			handler._initialize(server, function(err) {
 				assert.isNull(err);
 				done();
 			});
@@ -171,7 +223,7 @@ describe('TileRequestHandler', function() {
 			var _reshook1_called = false;
 			var _reshook2_called = false;
 			var _provider_called = false;
-			handler.registerCache({
+			handler.use({
 				init: function(_server, callback) {
 					_cache1_called = true;
 					assert.equal(_server, server);
@@ -180,7 +232,7 @@ describe('TileRequestHandler', function() {
 				get: function() {},
 				set: function() {}
 			});
-			handler.registerCache({
+			handler.use({
 				init: function(_server, callback) {
 					_cache2_called = true;
 					assert.equal(_server, server);
@@ -189,7 +241,7 @@ describe('TileRequestHandler', function() {
 				get: function() {},
 				set: function() {}
 			});
-			handler.registerProvider({
+			handler.use({
 				init: function(_server, callback) {
 					assert.equal(_server, server);
 					_provider_called = true;
@@ -197,7 +249,7 @@ describe('TileRequestHandler', function() {
 				},
 				serve: function() {}
 			});
-			handler.registerTransform({
+			handler.use({
 				init: function(_server, callback) {
 					assert.equal(_server, server);
 					_transform1_called = true;
@@ -205,7 +257,7 @@ describe('TileRequestHandler', function() {
 				},
 				transform: function() {}
 			});
-			handler.registerTransform({
+			handler.use({
 				init: function(_server, callback) {
 					assert.equal(_server, server);
 					_transform2_called = true;
@@ -213,39 +265,39 @@ describe('TileRequestHandler', function() {
 				},
 				transform: function() {}
 			});
-			handler.registerRequestHook({
+			handler.use({
 				init: function(_server, callback) {
 					assert.equal(_server, server);
 					_reqhook1_called = true;
 					callback();
 				},
-				hook: function() {}
+				reqhook: function() {}
 			});
-			handler.registerRequestHook({
+			handler.use({
 				init: function(_server, callback) {
 					assert.equal(_server, server);
 					_reqhook2_called = true;
 					callback();
 				},
-				hook: function() {}
+				reqhook: function() {}
 			});
-			handler.registerResponseHook({
+			handler.use({
 				init: function(_server, callback) {
 					assert.equal(_server, server);
 					_reshook1_called = true;
 					callback();
 				},
-				hook: function() {}
+				reshook: function() {}
 			});
-			handler.registerResponseHook({
+			handler.use({
 				init: function(_server, callback) {
 					assert.equal(_server, server);
 					_reshook2_called = true;
 					callback();
 				},
-				hook: function() {}
+				reshook: function() {}
 			});
-			handler.initialize(server, function(err) {
+			handler._initialize(server, function(err) {
 				assert.isNull(err);
 				assert.isTrue(_cache1_called, 'Cache 1 initialized');
 				assert.isTrue(_cache2_called, 'Cache 2 initialized');
@@ -263,8 +315,8 @@ describe('TileRequestHandler', function() {
 			var _err = new Error('It failed');
 			var server = new TileServer();
 			var handler = new TileRequestHandler();
-			handler.registerProvider({init: function(server, callback) { callback(_err); }, serve: function() {}});
-			handler.initialize(server, function(err) {
+			handler.use({init: function(server, callback) { callback(_err); }, serve: function() {}});
+			handler._initialize(server, function(err) {
 				assert.equal(err, _err);
 				done();
 			});
@@ -273,8 +325,8 @@ describe('TileRequestHandler', function() {
 			var _err = new Error('It failed');
 			var server = new TileServer();
 			var handler = new TileRequestHandler();
-			handler.registerCache({init: function(server, callback) { callback(_err); }, get: function() {}, set: function() {}});
-			handler.initialize(server, function(err) {
+			handler.use({init: function(server, callback) { callback(_err); }, get: function() {}, set: function() {}});
+			handler._initialize(server, function(err) {
 				assert.equal(err, _err);
 				done();
 			});
@@ -288,7 +340,7 @@ describe('TileRequestHandler', function() {
 			var _cache1_called = false;
 			var _cache2_called = false;
 
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) {
 					_cache1_called = true;
 					assert.equal(server, mockServer);
@@ -298,7 +350,7 @@ describe('TileRequestHandler', function() {
 				},
 				set: function() {}
 			});
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) {
 					_cache2_called = true;
 					assert.equal(server, mockServer);
@@ -307,7 +359,7 @@ describe('TileRequestHandler', function() {
 				},
 				set: function() {}
 			});
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					throw new Error('Shouldn\'t have been called');
 				}
@@ -328,14 +380,14 @@ describe('TileRequestHandler', function() {
 			var handler = new TileRequestHandler();
 			var _cache_called = false;
 
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) {
 					_cache_called = true;
 					callback(new Error('Cache failure'));
 				},
 				set: function() {}
 			});
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
 				}
@@ -353,17 +405,17 @@ describe('TileRequestHandler', function() {
 			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
 			var handler = new TileRequestHandler();
 
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					callback(new Error('Provider failed'));
 				}
 			});
-			handler.registerTransform({
+			handler.use({
 				transform: function(server, req, buffer, headers, callback) {
 					throw new Error('Should not be called');
 				}
 			});
-			handler.registerTransform({
+			handler.use({
 				transform: function(server, req, buffer, headers, callback) {
 					throw new Error('Should not be called');
 				}
@@ -380,7 +432,7 @@ describe('TileRequestHandler', function() {
 			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
 			var handler = new TileRequestHandler();
 
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) {
 					callback();
 				},
@@ -388,17 +440,17 @@ describe('TileRequestHandler', function() {
 					throw new Error('Should not be called');
 				}
 			});
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
 				}
 			});
-			handler.registerTransform({
+			handler.use({
 				transform: function(server, req, buffer, headers, callback) {
 					callback(new Error('Something went wrong w/transform'))
 				}
 			});
-			handler.registerTransform({
+			handler.use({
 				transform: function(server, req, buffer, headers, callback) {
 					throw new Error('Should not be called');
 				}
@@ -416,7 +468,7 @@ describe('TileRequestHandler', function() {
 			var handler = new TileRequestHandler();
 			var _cache_called = false;
 
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) {
 					_cache_called = true;
 					callback(new Error('Cache failure'));
@@ -427,12 +479,12 @@ describe('TileRequestHandler', function() {
 					done();
 				}
 			});
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
 				}
 			});
-			handler.registerTransform({
+			handler.use({
 				transform: function(server, req, buffer, headers, callback) {
 					assert.equal(server, mockServer);
 					assert.equal(req, mockRequest);
@@ -442,7 +494,7 @@ describe('TileRequestHandler', function() {
 					callback(null, new Buffer('transform1', 'utf8'), {'X-Transform': '1'});
 				}
 			});
-			handler.registerTransform({
+			handler.use({
 				transform: function(server, req, buffer, headers, callback) {
 					assert.equal(server, mockServer);
 					assert.equal(req, mockRequest);
@@ -464,11 +516,11 @@ describe('TileRequestHandler', function() {
 			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
 			var handler = new TileRequestHandler();
 
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) { callback(); },
 				set: function() { throw new Error('Should not have been called') }
 			});
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					callback(new Error('Something went wrong'))
 				}
@@ -483,32 +535,31 @@ describe('TileRequestHandler', function() {
 		it('should should acknowledge "race" cacheFetchMode', function(done) {
 			var mockServer = new TileServer();
 			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
-			var handler = new TileRequestHandler();
+			var handler = new TileRequestHandler({cacheFetchMode: 'race'});
 			var _cache1_called = false;
 			var _cache1_finished = false;
 			var _cache2_finished = false;
 
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) {
 					_cache1_called = true;
 					// never call back
 				},
 				set: function() {}
 			});
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) {
 					assert.isTrue(_cache1_called);
 					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
 				},
 				set: function() {}
 			});
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					throw new Error('Shouldn\'t have been called');
 				}
 			});
 
-			handler.setCacheFetchMode('race');
 			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
 				assert.isTrue(_cache1_called, 'Cache 1 should have been called');
 				assert.equal(status, 200);
@@ -535,17 +586,17 @@ describe('TileRequestHandler', function() {
 				}
 			};
 
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) { callback(); },
 				set: cacheSet
 			});
 
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) { callback(); },
 				set: cacheSet
 			});
 
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					var _buffer = new Buffer('success', 'utf8');
 					var _headers = {'X-Test-Status': 'success'};
@@ -563,7 +614,7 @@ describe('TileRequestHandler', function() {
 			var mockServer = new TileServer();
 			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
 			var handler = new TileRequestHandler();
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					assert.equal(server, mockServer);
 					assert.equal(req, mockRequest);
@@ -599,7 +650,7 @@ describe('TileRequestHandler', function() {
 			var _responses = 0;
 
 			var handler = new TileRequestHandler();
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					_calls_provider++;
 					setImmediate(function() {
@@ -632,7 +683,7 @@ describe('TileRequestHandler', function() {
 			var _cache_get_calls = 0;
 			var _cache_set_calls = 0;
 
-			handler.registerCache({
+			handler.use({
 				get: function(server, req, callback) {
 					_cache_get_calls++;
 					callback();
@@ -646,7 +697,7 @@ describe('TileRequestHandler', function() {
 				}
 			});
 
-			handler.registerProvider({
+			handler.use({
 				serve: function(server, req, callback) {
 					var _buffer = new Buffer('success', 'utf8');
 					var _headers = {'X-Test-Status': 'success'};

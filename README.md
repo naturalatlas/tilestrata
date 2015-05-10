@@ -33,37 +33,30 @@ TileStrata consists of three main actors, usually implemented as plugins:
 
 ```js
 var tilestrata = require('tilestrata');
-var strata = tilestrata.createServer();
-strata.registerLayer(require('./layers/basemap.js'));
-strata.listen(8080);
-```
-
-With a layer file looking like:
-
-```js
 var disk = require('tilestrata-disk');
 var sharp = require('tilestrata-sharp');
 var mapnik = require('tilestrata-mapnik');
 var dependency = require('tilestrata-dependency');
+var strata = tilestrata.createServer();
 
-module.exports = function(layer) {
-    layer.setName('basemap');
-    layer.registerRoute('tile@2x.png', function(handler) {
-        handler.registerCache(disk({dir: '/var/lib/tiles/basemap'}));
-        handler.registerProvider(mapnik({
+// define layers
+strata.layer('basemap')
+    .route('tile@2x.png')
+        .use(disk({dir: '/var/lib/tiles/basemap'}))
+        .use(mapnik({
             xml: '/path/to/map.xml',
             tileSize: 512,
             scale: 2
-        }));
-    });
-    layer.registerRoute('tile.png', function(handler) {
-        handler.registerCache(disk({dir: '/var/lib/tiles/basemap'}));
-        handler.registerProvider(dependency('basemap', 'tile@2x.png'));
-        handler.registerTransform(sharp(function(image, sharp) {
+        }))
+    .route('tile.png')
+        .use(disk({dir: '/var/lib/tiles/basemap'}))
+        .use(dependency('basemap', 'tile@2x.png'))
+        .use(sharp(function(image, sharp) {
             return image.resize(256);
         }));
-    });
-};
+
+// start accepting requests
+strata.listen(8080);
 ```
 
 Once configured and started, tiles can be accessed via:
@@ -79,8 +72,9 @@ TileStrata comes with middleware for Express that makes serving tiles from an ex
 ```js
 var tilestrata = require('tilestrata');
 var strata = tilestrata.createServer();
-strata.registerLayer(require('./layers/basemap.js'));
-strata.registerLayer(require('./layers/contours.js'));
+strata.layer('basemap') /* ... */
+strata.layer('contours') /* ... */
+
 app.use(tilestrata.middleware({
     server: strata,
     prefix: '/maps'
@@ -107,8 +101,8 @@ tilemantle http://myhost.com/mylayer/{z}/{x}/{y}/t.png \
 ##### server.listen(port, [hostname], [callback])
 Starts accepting requests on the specified port. The arguments to this method are exactly identical to node's http.Server [listen()](http://nodejs.org/api/http.html#http_server_listen_port_hostname_backlog_callback) method.
 
-##### server.registerLayer(init)
-The `init` function will be called immediately with a blank [TileLayer](#tilelayer) instance to be configured.
+##### server.layer(name)
+Registers a new layer with the given name and returns its [TileLayer](#tilelayer) instance. If the layer already exists, the existing instance will be returned. Whatever name is used will be the first part of the url that can be used to fetch tiles: `/:layer/...`
 
 ##### server.getTile(layer, filename, x, y, z, callback)
 Attempts to retrieve a tile from the specified layer (string). The callback will be invoked with three arguments: `err`, `buffer`, and `headers`.
@@ -118,32 +112,16 @@ The version of TileStrata (useful to plugins, mainly).
 
 #### [TileLayer](#tilelayer)
 
-##### layer.setName(name)
-Sets the name of the layer. Whatever name is used will be the first part of the url that can be used to fetch tiles: `/:layer/...`
+##### layer.route(filename, [options])
 
-##### layer.registerRoute(filename, init)
+Registers a route. Returns a [TileRequestHandler](#tilerequesthandler) instance to be configured. The available options are:
 
-The `init` function will be called immediately with a blank [TileRequestHandler](#tilerequesthandler) instance to be configured.
+  - **cacheFetchMode**: Defines how cache fetching happens when multiple caches are configured. The mode can be `"sequential"` or `"race"`. If set to `"race"`, TileStrata will fetch from all caches simultaneously and return the first that wins.
 
 #### [TileRequestHandler](#tilerequesthandler)
 
-##### handler.setCacheFetchMode(mode)
-Defines how cache fetching happens when multiple caches are configured. The mode can be `"sequential"` or `"race"`. If set to `"race"`, TileStrata will fetch from all caches simultaneously and return the first that wins.
-
-##### handler.registerProvider(provider)
-Registers a provider that serves as the source of the layer. See ["Writing Providers"](#writing-providers) for more info.
-
-##### handler.registerCache(cache)
-Registers a cache that can be used to fetch/persist the tile file. See ["Writing Caches"](#writing-caches) for more info. The cache fetch order will be the order in which caches were registered (unless when `"race"` mode is enabled).
-
-##### handler.registerTransform(transform)
-Registers a transform that takes a buffer and set of headers and returns a new buffer + headers. See ["Writing Transforms"](#writing-transforms) for more info. The transforms will be in the same order as they were registered.
-
-##### handler.registerRequestHook(hook)
-Registers a function that is called before a request is processed. Use it to intercept requests for logging, authentication, etc. See ["Writing Request Hooks"](#writing-request-hooks) for more info. 
-
-##### handler.registerResponseHook(hook)
-Registers a function that is called right before a response is sent to the browser. See ["Writing Response Hooks"](#writing-response-hooks) for more info. 
+##### handler.use(plugin)
+Registers a plugin, which is either a provider, cache, transform, request hook, response hook, or combination of them. See the READMEs on the prebuilt plugins and/or the ["Writing TileStrata Plugins"](#writing-tilestrata-plugins) section below for more info.
 
 #### [TileRequest](#tilerequest)
 
@@ -152,11 +130,11 @@ A request contains these properties: `x`, `y`, `z`, `layer` (string), `filename`
 ##### tile.clone()
 Returns an identical copy of the tile request that's safe to mutate.
 
-## Extending TileStrata
+## Writing TileStrata Plugins
 
 ### Writing Request Hooks
 
-The `registerRequestHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). This makes it possible to respond without even getting to the tile-serving logic (just don't call the callback).
+A request hook implementation needs one method: `reqhook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). This makes it possible to respond without even getting to the tile-serving logic (just don't call the callback).
 
 ```js
 module.exports = function(options) {
@@ -164,7 +142,7 @@ module.exports = function(options) {
         init: function(server, callback) {
             callback(err);
         },
-        hook: function(server, tile, req, res, callback) {
+        reqhook: function(server, tile, req, res, callback) {
             callback();
         }
     };
@@ -173,7 +151,7 @@ module.exports = function(options) {
 
 ### Writing Caches
 
-The `registerCache` method expects an object with two methods: `get`, `set`. Optionally a cache can declare an `init` method that gets called when the server is initializing. If a cache fails (returns an error to the callback), the server will ignore the error and attempt to serve the tile from the registered provider.
+A cache implementation needs two methods: `get`, `set`. Optionally a cache can declare an `init` method that gets called when the server is initializing. If a cache fails (returns an error to the callback), the server will ignore the error and attempt to serve the tile from the registered provider.
 
 ```js
 module.exports = function(options) {
@@ -193,7 +171,7 @@ module.exports = function(options) {
 
 ### Writing Providers
 
-Providers are responsible for building tiles. The `registerProvider` method expects an object containing a `serve` method, and optionally an `init` method.
+Providers are responsible for building tiles. A provider must define a `serve` method and optionally an `init` method that is called when the server starts.
 
 ```js
 module.exports = function(options) {
@@ -210,7 +188,7 @@ module.exports = function(options) {
 
 ### Writing Transforms
 
-Transforms modify the result from a provider before it's served (and cached). The `registerTransform` method expects an object containing a `transform` method, and optionally an `init` method.
+Transforms modify the result from a provider before it's served (and cached). A tranform must define a `transform` method and optionally an `init` method.
 
 ```js
 module.exports = function(options) {
@@ -227,7 +205,7 @@ module.exports = function(options) {
 
 ### Writing Response Hooks
 
-The `registerResponseHook` method expects an object with one method: `hook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). The "result" argument contains three properties: `headers`, `buffer`, and `status` - each of which can be modified to affect the final response.
+A response hook implementation needs one method: `reshook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). The "result" argument contains three properties: `headers`, `buffer`, and `status` — each of which can be modified to affect the final response.
 
 ```js
 module.exports = function(options) {
@@ -235,10 +213,22 @@ module.exports = function(options) {
         init: function(server, callback) {
             callback(err);
         },
-        hook: function(server, tile, req, res, result, callback) {
+        reshook: function(server, tile, req, res, result, callback) {
             callback();
         }
     };
+};
+```
+
+### Multi-Function Plugins
+
+Sometimes a plugin must consist of multiple parts. For instance, a plugin tracking response times must register a request hook and response hook. To accomodate this, TileStrata supports arrays:
+```js
+module.exports = function() {
+    return [
+        {reqhook: function(...) { /* ... */ }},
+        {reshook: function(...) { /* ... */ }}
+    ];
 };
 ```
 

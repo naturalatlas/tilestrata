@@ -3,39 +3,53 @@ var TileRequestHandler = require('../lib/TileRequestHandler.js');
 var assert = require('chai').assert;
 
 describe('TileLayer', function() {
-	describe('setName()', function() {
-		it('should set name attribute', function() {
-			var layer = new TileLayer();
-			layer.setName('map_layer');
-			assert.equal(layer.name, 'map_layer');
-			layer = new TileLayer();
-			layer.setName('map-layer');
-			assert.equal(layer.name, 'map-layer');
-			layer = new TileLayer();
-			layer.setName('map-layer12');
-			assert.equal(layer.name, 'map-layer12');
-		});
-		it('should throw error when invalid', function() {
+	describe('constructor', function() {
+		it('should require valid name', function() {
 			assert.throws(function() {
-				var layer = new TileLayer();
-				layer.setName('name?');
+				new TileLayer('name?');
 			}, /Invalid layer name/);
 		});
+		it('should set name property', function() {
+			var layer = new TileLayer('map_layer');
+			assert.equal(layer.name, 'map_layer');
+			layer = new TileLayer('map-layer');
+			assert.equal(layer.name, 'map-layer');
+			layer = new TileLayer('map-layer12');
+			assert.equal(layer.name, 'map-layer12');
+		});
 	});
-	describe('registerRoute()', function() {
-		it('should init route and add to "routes" hash', function(done) {
-			var _handler;
-			var layer = new TileLayer();
-			layer.registerRoute('filename.png', function(handler) {
-				_handler = handler;
-				assert.instanceOf(handler, TileRequestHandler);
-				setImmediate(function() {
-					assert.deepEqual(layer.routes, {
-						'filename.png': {filename: 'filename.png', handler: _handler}
-					});
-					done();
-				});
+	describe('route()', function() {
+		it('should return existing handler if route already registered', function() {
+			var layer = new TileLayer('layer');
+			var handler = layer.route('filename.png');
+			assert.equal(layer.route('filename.png'), handler);
+		});
+		it('should add to "routes" hash and return handler', function() {
+			var layer = new TileLayer('layer');
+			var handler = layer.route('filename.png');
+			assert.instanceOf(handler, TileRequestHandler)
+			assert.deepEqual(layer.routes, {
+				'filename.png': {filename: 'filename.png', handler: handler}
 			});
+		});
+		it('should throw if options passed and route already registered', function() {
+			var layer = new TileLayer('layer');
+			var handler = layer.route('filename.png', {});
+			assert.throws(function() {
+				layer.route('filename.png', {});
+			}, /Cannot pass options when layer is already registered/);
+		});
+		it('should accept options', function() {
+			var layer = new TileLayer('layer');
+			var handler = layer.route('filename.png', {});
+			assert.equal(handler.cacheFetchMode, 'sequential');
+			var handler = layer.route('filename2.png', {cacheFetchMode: 'race'});
+			assert.equal(handler.cacheFetchMode, 'race');
+		});
+		it('should add route() method alias to handler (for chaining)', function() {
+			var layer = new TileLayer('layer');
+			var handler = layer.route('filename.png', {});
+			assert.equal(handler.route('filename.png'), handler);
 		});
 	});
 });

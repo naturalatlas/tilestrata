@@ -73,40 +73,37 @@ describe('require("tilestrata")', function() {
 			};
 
 			var server = new TileServer();
-			server.registerLayer(function(layer) {
-				layer.setName('basemap');
-				layer.registerRoute('file.txt', function(handler) {
-					handler.registerRequestHook({
-						hook: function(_server, _tile, _req, _res, callback) {
-							reqhook_called = true;
-							assert.equal(_server, server);
-							assert.instanceOf(_tile, TileRequest);
-							assert.equal(_req.url, '/tiles/basemap/3/2/1/file.txt');
-							assert.isFunction(_res.writeHead);
-							callback();
-						}
-					});
-					handler.registerResponseHook({
-						hook: function(_server, _tile, _req, _res, _result, callback) {
-							reshook_called = true;
-							assert.equal(_server, server);
-							assert.deepEqual(_result.headers, {
-								'X-Test':'1',
-								'X-Powered-By': 'TileStrata/' + version,
-								'Cache-Control': 'max-age=60'
-							});
-							assert.instanceOf(_result.buffer, Buffer);
-							assert.instanceOf(_tile, TileRequest);
-							assert.equal(_req.url, '/tiles/basemap/3/2/1/file.txt');
-							assert.isFunction(_res.writeHead);
-							callback();
-						}
-					});
-					handler.registerProvider({serve: function(server, req, callback) {
-						callback(null, new Buffer('tile', 'utf8'), {'X-Test':'1'});
-					}});
-				});
-			});
+			server.layer('basemap').route('file.txt')
+				.use({
+					reqhook: function(_server, _tile, _req, _res, callback) {
+						reqhook_called = true;
+						assert.equal(_server, server);
+						assert.instanceOf(_tile, TileRequest);
+						assert.equal(_req.url, '/tiles/basemap/3/2/1/file.txt');
+						assert.isFunction(_res.writeHead);
+						callback();
+					}
+				})
+				.use({
+					reshook: function(_server, _tile, _req, _res, _result, callback) {
+						reshook_called = true;
+						assert.equal(_server, server);
+						assert.deepEqual(_result.headers, {
+							'X-Test':'1',
+							'X-Powered-By': 'TileStrata/' + version,
+							'Cache-Control': 'max-age=60'
+						});
+						assert.instanceOf(_result.buffer, Buffer);
+						assert.instanceOf(_tile, TileRequest);
+						assert.equal(_req.url, '/tiles/basemap/3/2/1/file.txt');
+						assert.isFunction(_res.writeHead);
+						callback();
+					}
+				})
+				.use({serve: function(server, req, callback) {
+					callback(null, new Buffer('tile', 'utf8'), {'X-Test':'1'});
+				}});
+
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
 			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {status: 200, headers: expected_headers, buffer: new Buffer('tile', 'utf8')}, function() {
 				assert.isTrue(reqhook_called, 'Request hook called');
@@ -116,14 +113,9 @@ describe('require("tilestrata")', function() {
 		});
 		it('should call next() when route url doesn\'t match', function(done) {
 			var server = new TileServer();
-			server.registerLayer(function(layer) {
-				layer.setName('basemap');
-				layer.registerRoute('file.txt', function(handler) {
-					handler.registerProvider({serve: function(server, req, callback) {
-						callback(null, new Buffer('tile', 'utf8'), {'X-Test':'1'});
-					}});
-				});
-			});
+			server.layer('basemap').route('file.txt').use({serve: function(server, req, callback) {
+				callback(null, new Buffer('tile', 'utf8'), {'X-Test':'1'});
+			}});
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
 			testMiddleware(middleware, '/basemap/3/2/1/file.txt', true, null, done);
 		});

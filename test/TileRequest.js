@@ -71,9 +71,10 @@ describe('TileRequest', function() {
 			assert.equal(clone.layer, 'lyr1');
 			assert.equal(clone.method, 'GET');
 			assert.equal(clone.filename, 'tile@2x.png');
-			assert.equal(clone.z, 1),
-			assert.equal(clone.x, 2),
-			assert.equal(clone.y, 3),
+			assert.equal(clone.z, 1);
+			assert.equal(clone.x, 2);
+			assert.equal(clone.y, 3);
+			assert.equal(clone.qs, 'query=1&test=2');
 
 			assert.notEqual(clone.headers, original.headers);
 			assert.deepEqual(clone.headers, {'x-tilestrata-skipcache': '1'});
