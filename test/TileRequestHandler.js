@@ -84,6 +84,12 @@ describe('TileRequestHandler', function() {
 			assert.equal(handler.requestHooks[0], _reqhook);
 			assert.equal(handler.responseHooks[0], _reshook);
 		});
+		it('should throw if unable to recognize plugin', function() {
+			var handler = new TileRequestHandler();
+			assert.throws(function() {
+				handler.use({});
+			}, /Invalid plugin/);
+		});
 	});
 	describe('_registerProvider()', function() {
 		it('should throw if passed invalid value', function() {
