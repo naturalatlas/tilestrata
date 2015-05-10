@@ -15,6 +15,7 @@ describe('TileRequest', function() {
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
 			assert.equal(result.method, 'GET');
+			assert.equal(result.qs, undefined);
 			assert.deepEqual(result.headers, {});
 
 			// no leading slash
@@ -26,6 +27,7 @@ describe('TileRequest', function() {
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
 			assert.equal(result.method, 'GET');
+			assert.equal(result.qs, undefined);
 			assert.deepEqual(result.headers, {});
 
 			// query string
@@ -37,6 +39,7 @@ describe('TileRequest', function() {
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
 			assert.equal(result.method, 'GET');
+			assert.equal(result.qs, 'query=1&test=2');
 			assert.deepEqual(result.headers, {});
 
 			// headers
