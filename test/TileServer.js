@@ -544,7 +544,7 @@ describe('TileServer', function() {
 			server.layer('mylayer').route('tile.txt').use({serve: function(server, req, callback) {
 				var message = 'hello x: ' + req.x + ' y: ' + req.y + ' z: ' + req.z;
 				callback(null, new Buffer(message, 'utf8'), {
-					'Content-Type': 'text-plain',
+					'Content-Type': 'text/plain',
 					'X-Header': 'test'
 				})
 			}});
@@ -555,12 +555,34 @@ describe('TileServer', function() {
 					var body = '';
 					res.on('data', function(data) { body += data; });
 					res.on('end', function() {
+						assert.equal(res.statusCode, 200);
 						assert.equal(body, 'hello x: 2 y: 1 z: 3');
-						assert.equal(res.headers['content-type'], 'text-plain');
+						assert.equal(res.headers['content-type'], 'text/plain');
 						assert.equal(res.headers['content-length'], 'hello x: 2 y: 1 z: 3'.length);
 						assert.equal(res.headers['x-header'], 'test');
 						assert.equal(res.headers['x-powered-by'], HEADER_XPOWEREDBY);
 						done();
+					});
+				});
+			});
+		});
+		describe('robots.txt', function() {
+			it('should disallow indexing', function(done) {
+				var server = new TileServer();
+
+				server.listen(8887, function(err) {
+					assert.isFalse(!!err, 'Unexpected error: ' + (err ? (err.message || err) : ''));
+					http.get('http://localhost:8887/robots.txt', function(res) {
+						var body = '';
+						res.on('data', function(data) { body += data; });
+						res.on('end', function() {
+							assert.equal(res.statusCode, 200);
+							var expected = 'User-agent: *\nDisallow: /\n';
+							assert.equal(body, expected);
+							assert.equal(res.headers['content-type'], 'text/plain');
+							assert.equal(res.headers['content-length'], expected.length);
+							done();
+						});
 					});
 				});
 			});
