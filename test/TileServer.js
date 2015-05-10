@@ -32,6 +32,11 @@ describe('TileServer', function() {
 				server.layer();
 			}, /The layer must be given name/);
 		});
+		it('should add layer() method alias to layer (for chaining)', function() {
+			var server = new TileServer();
+			var layer = server.layer('mylayer');
+			assert.equal(layer.layer('mylayer'), layer);
+		});
 	});
 	describe('serve()', function() {
 		it('should return a 404 status if route not parseable', function(done) {

@@ -51,5 +51,11 @@ describe('TileLayer', function() {
 			var handler = layer.route('filename.png', {});
 			assert.equal(handler.route('filename.png'), handler);
 		});
+		it('should add layer() method alias to handler (for chaining)', function() {
+			var layer = new TileLayer('layer');
+			layer.layer = function() {}; // normally added to TileLayer instance by TileServer's layer() method
+			var handler = layer.route('filename.png', {});
+			assert.equal(handler.layer, layer.layer);
+		});
 	});
 });
