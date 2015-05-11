@@ -376,7 +376,7 @@ describe('TileRequestHandler', function() {
 				assert.isTrue(_cache2_called, 'Cache 2 should have been called');
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'success');
-				assert.deepEqual(headers, {'X-Test-Status': 'success'});
+				assert.deepEqual(headers, {'X-Test-Status': 'success', 'X-TileStrata-CacheHit': '1'});
 				done();
 			});
 		});
@@ -570,7 +570,7 @@ describe('TileRequestHandler', function() {
 				assert.isTrue(_cache1_called, 'Cache 1 should have been called');
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'success');
-				assert.deepEqual(headers, {'X-Test-Status': 'success'});
+				assert.deepEqual(headers, {'X-Test-Status': 'success', 'X-TileStrata-CacheHit': '1'});
 				done();
 			});
 		});
