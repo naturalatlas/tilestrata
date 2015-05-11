@@ -29,6 +29,7 @@ TileStrata consists of three main actors, usually implemented as plugins:
 - [tilestrata-headers](https://github.com/naturalatlas/tilestrata-headers) – Set/override response headers.
 - [tilestrata-blend](https://github.com/naturalatlas/tilestrata-blend) – Stack multiple layers together.
 - [tilestrata-jsonp](https://github.com/naturalatlas/tilestrata-jsonp) – Serve utfgrids (and other JSON) as JSONP.
+- [tilestrata-datadog](https://github.com/naturalatlas/tilestrata-datadog) – Send timing information to [Datadog](https://www.datadoghq.com/).
 
 ## Configuration
 
