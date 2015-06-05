@@ -17,6 +17,15 @@ describe('TileLayer', function() {
 			layer = new TileLayer('map-layer12');
 			assert.equal(layer.name, 'map-layer12');
 		});
+		it('should default options property to {}', function() {
+			var layer = new TileLayer('map_layer', null);
+			assert.equal(JSON.stringify(layer.options), '{}');
+		});
+		it('should set options property', function() {
+			var opts = {};
+			var layer = new TileLayer('map_layer', opts);
+			assert.equal(layer.options,opts);
+		});
 	});
 	describe('route()', function() {
 		it('should return existing handler if route already registered', function() {

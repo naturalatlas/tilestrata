@@ -17,9 +17,11 @@ describe('TileServer', function() {
 	describe('layer()', function() {
 		it('should operate normally', function() {
 			var server = new TileServer();
-			var layer = server.layer('mylayer');
+			var opts = {};
+			var layer = server.layer('mylayer', opts);
 			assert.deepEqual(Object.keys(server.layers), ['mylayer']);
 			assert.equal(server.layers['mylayer'], layer);
+			assert.equal(layer.options, opts);
 		});
 		it('should return existing layer if already exists', function() {
 			var server = new TileServer();
@@ -46,6 +48,54 @@ describe('TileServer', function() {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
 				assert.deepEqual(headers, {});
+				done();
+			});
+		});
+		it('should return a 404 status is request outside of layer bbox', function(done) {
+			var valid_bbox = [
+				-111.37390136718749,
+				45.3297027614069,
+				-111.11228942871094,
+				45.47746617959318
+			];
+			var server = new TileServer();
+			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use({
+				serve: function(server, req, callback) {
+					callback(null, new Buffer(''), {});
+				}
+			});
+
+			var tile_outside = '12/781/1469';
+			var req = TileRequest.parse('/layer/' + tile_outside + '/tile.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 404);
+				assert.equal(buffer.toString('utf8'), 'Not found');
+				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
+					'Content-Length': 9
+				});
+				done();
+			});
+		});
+		it('should return a 200 status is request inside of layer bbox', function(done) {
+			var valid_bbox = [
+				-111.37390136718749,
+				45.3297027614069,
+				-111.11228942871094,
+				45.47746617959318
+			];
+			var server = new TileServer();
+			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use({
+				serve: function(server, req, callback) {
+					callback(null, new Buffer('Valid'), {});
+				}
+			});
+
+			var tile_inside = '14/3129/5867';
+			var req = TileRequest.parse('/layer/' + tile_inside + '/tile.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'Valid');
 				done();
 			});
 		});
