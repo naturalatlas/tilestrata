@@ -31,6 +31,8 @@ TileStrata consists of three main actors, usually implemented as plugins:
 - [tilestrata-jsonp](https://github.com/naturalatlas/tilestrata-jsonp) – Serve utfgrids (and other JSON) as JSONP.
 - [tilestrata-datadog](https://github.com/naturalatlas/tilestrata-datadog) – Send timing information to [Datadog](https://www.datadoghq.com/).
 - [tilestrata-utfmerge](https://github.com/naturalatlas/tilestrata-utfmerge) – Merge UTF interactivity grids from mapnik.
+- [tilestrata-vtile](https://github.com/naturalatlas/tilestrata-vtile) – Outputs mapnik vector tiles (protobufs).
+- [tilestrata-vtile-raster](https://github.com/naturalatlas/tilestrata-vtile-raster) – Renders mapnik vector tiles into raster images.
 
 ## Configuration
 
