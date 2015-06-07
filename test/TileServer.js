@@ -7,6 +7,11 @@ var version = require('../package.json').version;
 
 var HEADER_CACHECONTROL = 'max-age=60';
 var HEADER_XPOWEREDBY = 'TileStrata/' + version;
+var noop_provider = {
+	serve: function(server, req, callback) {
+		callback(null, new Buffer(''), {});
+	}
+};
 
 describe('TileServer', function() {
 	it('should have "version" property', function() {
@@ -51,6 +56,38 @@ describe('TileServer', function() {
 				done();
 			});
 		});
+		it('should return a 404 status is request outside of minZoom', function(done) {
+			var server = new TileServer();
+			server.layer('layer', {minZoom: 10}).route('tile.png').use(noop_provider);
+
+			var req = TileRequest.parse('/layer/9/781/1469/tile.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 404);
+				assert.equal(buffer.toString('utf8'), 'Not found');
+				done();
+			});
+		});
+		it('should return a 404 status is request outside of maxZoom', function(done) {
+			var server = new TileServer();
+			server.layer('layer', {maxZoom: 10}).route('tile.png').use(noop_provider);
+
+			var req = TileRequest.parse('/layer/11/781/1469/tile.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 404);
+				assert.equal(buffer.toString('utf8'), 'Not found');
+				done();
+			});
+		});
+		it('should return a 200 status is request inside of minZoom,maxZoom', function(done) {
+			var server = new TileServer();
+			server.layer('layer', {minZoom: 10, maxZoom: 10}).route('tile.png').use(noop_provider);
+
+			var req = TileRequest.parse('/layer/10/781/1469/tile.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 200);
+				done();
+			});
+		});
 		it('should return a 404 status is request outside of layer bbox', function(done) {
 			var valid_bbox = [
 				-111.37390136718749,
@@ -59,21 +96,13 @@ describe('TileServer', function() {
 				45.47746617959318
 			];
 			var server = new TileServer();
-			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use({
-				serve: function(server, req, callback) {
-					callback(null, new Buffer(''), {});
-				}
-			});
+			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use(noop_provider);
 
 			var tile_outside = '12/781/1469';
 			var req = TileRequest.parse('/layer/' + tile_outside + '/tile.png', {}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
-				assert.deepEqual(headers, {
-					'X-Powered-By': HEADER_XPOWEREDBY,
-					'Content-Length': 9
-				});
 				done();
 			});
 		});
