@@ -24,7 +24,7 @@
   "dependencies": {
     "async": "^0.9.0",
     "bbox-intersect": "^0.1.1",
-    "etag": "^1.5.1",
+    "etag": "1.7.0",
     "lodash": "^2.4.1",
     "lru-cache": "^2.5.0",
     "tilebelt": "^0.7.1"

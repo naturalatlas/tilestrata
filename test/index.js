@@ -69,7 +69,7 @@ describe('require("tilestrata")', function() {
 				'X-Powered-By': 'TileStrata/' + version,
 				'Content-Length': 4,
 				'Cache-Control': 'max-age=60',
-				'ETag': '"ExgdjMAeOQv2TJ5LDXp58w=="'
+				'ETag': '"4-ExgdjMAeOQv2TJ5LDXp58w"'
 			};
 
 			var server = new TileServer();

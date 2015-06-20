@@ -188,7 +188,7 @@ describe('TileServer', function() {
 					'X-Test': 'hello',
 					'Content-Length': 8,
 					'Cache-Control': HEADER_CACHECONTROL,
-					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
+					'ETag': '"8-0fyOrzaTe+DDuoz+Ciwb/g"'
 				});
 				done();
 			});
@@ -258,7 +258,7 @@ describe('TileServer', function() {
 					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
 					'Cache-Control': HEADER_CACHECONTROL,
-					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="',
+					'ETag': '"8-0fyOrzaTe+DDuoz+Ciwb/g"',
 					'Content-Length': 8
 				});
 				done();
@@ -275,14 +275,14 @@ describe('TileServer', function() {
 				}
 			});
 
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {'if-none-match': '"0fyOrzaTe+DDuoz+Ciwb/g=="'}, 'GET');
+			var req = TileRequest.parse('/layer/1/2/3/tile.png', {'if-none-match': '"8-0fyOrzaTe+DDuoz+Ciwb/g"'}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 304);
 				assert.equal(buffer.toString('utf8'), '');
 				assert.deepEqual(headers, {
 					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
-					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="',
+					'ETag': '"8-0fyOrzaTe+DDuoz+Ciwb/g"',
 					'Cache-Control': HEADER_CACHECONTROL,
 					'Content-Length': 8
 				});
@@ -309,7 +309,7 @@ describe('TileServer', function() {
 					'X-Test': 'hello',
 					'Content-Length': 8,
 					'Cache-Control': HEADER_CACHECONTROL,
-					'ETag': '"0fyOrzaTe+DDuoz+Ciwb/g=="'
+					'ETag': '"8-0fyOrzaTe+DDuoz+Ciwb/g"'
 				});
 				done();
 			});
@@ -337,7 +337,7 @@ describe('TileServer', function() {
 						'X-Res-Hook-2': '1',
 						'Content-Length': 17,
 						'Cache-Control': HEADER_CACHECONTROL,
-						'ETag': '"miLcq2wD06H4X7CEVf44aA=="'
+						'ETag': '"11-miLcq2wD06H4X7CEVf44aA"'
 					});
 				},
 				write: function(buffer) {
@@ -459,7 +459,7 @@ describe('TileServer', function() {
 					'X-Test': 'hello',
 					'Content-Length': 6,
 					'Cache-Control': HEADER_CACHECONTROL,
-					'ETag': '"tKiEF7PQFw11TGR8MLchag=="'
+					'ETag': '"6-tKiEF7PQFw11TGR8MLchag"'
 				});
 				done();
 			});
