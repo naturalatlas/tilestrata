@@ -681,9 +681,37 @@ describe('TileRequestHandler', function() {
 			handler.GET(mockServer, req1, handleResponse);
 			handler.GET(mockServer, req2, handleResponse);
 		});
-		it('should skip cache get if "X-TileStrata-SkipCache" header present', function(done) {
+		it('should skip cache get if "X-TileStrata-SkipCache" header present and matches', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': '1'});
+			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': 'a/tile.png,layer/tile.png'});
+			var handler = new TileRequestHandler();
+
+			handler.use({
+				get: function(server, req, callback) {
+					throw new Error('Cache get should not be executed');
+				},
+				set: function(server, req, buffer, headers, callback) {
+					done();
+				}
+			});
+
+			handler.use({
+				serve: function(server, req, callback) {
+					var _buffer = new Buffer('success', 'utf8');
+					var _headers = {'X-Test-Status': 'success'};
+					callback(null, _buffer, _headers);
+				}
+			});
+
+			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'success');
+				assert.deepEqual(headers, {'X-Test-Status': 'success'});
+			});
+		});
+		it('should not skip cache get if "X-TileStrata-SkipCache" header present and does not match', function(done) {
+			var mockServer = new TileServer();
+			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': 'layer/tile.pnggg'});
 			var handler = new TileRequestHandler();
 
 			var _cache_get_calls = 0;
@@ -697,9 +725,7 @@ describe('TileRequestHandler', function() {
 				set: function(server, req, buffer, headers, callback) {
 					_cache_set_calls++;
 					callback();
-					if (_cache_set_calls === 1) {
-						setImmediate(done);
-					}
+					setImmediate(done);
 				}
 			});
 
@@ -712,8 +738,7 @@ describe('TileRequestHandler', function() {
 			});
 
 			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
-				assert.equal(_cache_get_calls, 0);
-				assert.equal(_cache_set_calls, 0);
+				assert.equal(_cache_get_calls, 1);
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'success');
 				assert.deepEqual(headers, {'X-Test-Status': 'success'});
