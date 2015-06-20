@@ -11,7 +11,6 @@ test-ci-coverage:
 	npm install coveralls
 	npm install istanbul
 	@rm -rf coverage
-	npm run clean
 	$(ISTANBUL) cover $(_MOCHA) --report lcovonly -- -R tap
 
 	@echo

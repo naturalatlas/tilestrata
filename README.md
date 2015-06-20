@@ -96,7 +96,13 @@ If you update your map styles or data, you'll probably want to update your tiles
 npm install -g tilemantle
 tilemantle http://myhost.com/mylayer/{z}/{x}/{y}/t.png \
     -p 44.9457507,-109.5939822 -b 30mi -z 10-14 \
-    -H "X-TileStrata-SkipCache:1"
+    -H "X-TileStrata-SkipCache:mylayer/t.png"
+```
+
+For the sake of the [tilestrata-dependency](https://github.com/naturalatlas/tilestrata-dependency) plugin, the value of the header is expected to be in the format:
+
+```
+[layer]/[file],[layer]/[file],...
 ```
 
 ## API Reference
