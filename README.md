@@ -102,7 +102,14 @@ tilemantle http://myhost.com/mylayer/{z}/{x}/{y}/t.png \
 For the sake of the [tilestrata-dependency](https://github.com/naturalatlas/tilestrata-dependency) plugin, the value of the header is expected to be in the format:
 
 ```
-[layer]/[file],[layer]/[file],...
+X-TileStrata-SkipCache:*
+X-TileStrata-SkipCache:[layer]/[file],[layer]/[file],...
+```
+
+In advanced use cases, it might be necessary for tiles to not be returned by the server until the cache is actually written (particularly when order matters due to dependencies). To achieve this, use:
+
+```
+X-TileStrata-CacheWait:1
 ```
 
 ## API Reference
