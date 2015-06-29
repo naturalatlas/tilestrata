@@ -73,13 +73,13 @@ describe('require("tilestrata")', function() {
 			};
 
 			var server = new TileServer();
-			server.layer('basemap').route('file.txt')
+			server.layer('basemap').route('.txt')
 				.use({
 					reqhook: function(_server, _tile, _req, _res, callback) {
 						reqhook_called = true;
 						assert.equal(_server, server);
 						assert.instanceOf(_tile, TileRequest);
-						assert.equal(_req.url, '/tiles/basemap/3/2/1/file.txt');
+						assert.equal(_req.url, '/tiles/basemap/3/2/1.txt');
 						assert.isFunction(_res.writeHead);
 						callback();
 					}
@@ -95,7 +95,7 @@ describe('require("tilestrata")', function() {
 						});
 						assert.instanceOf(_result.buffer, Buffer);
 						assert.instanceOf(_tile, TileRequest);
-						assert.equal(_req.url, '/tiles/basemap/3/2/1/file.txt');
+						assert.equal(_req.url, '/tiles/basemap/3/2/1.txt');
 						assert.isFunction(_res.writeHead);
 						callback();
 					}
@@ -105,7 +105,7 @@ describe('require("tilestrata")', function() {
 				}});
 
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
-			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {status: 200, headers: expected_headers, buffer: new Buffer('tile', 'utf8')}, function() {
+			testMiddleware(middleware, '/tiles/basemap/3/2/1.txt', false, {status: 200, headers: expected_headers, buffer: new Buffer('tile', 'utf8')}, function() {
 				assert.isTrue(reqhook_called, 'Request hook called');
 				assert.isTrue(reshook_called, 'Response hook called');
 				done();
@@ -113,11 +113,11 @@ describe('require("tilestrata")', function() {
 		});
 		it('should call next() when route url doesn\'t match', function(done) {
 			var server = new TileServer();
-			server.layer('basemap').route('file.txt').use({serve: function(server, req, callback) {
+			server.layer('basemap').route('.txt').use({serve: function(server, req, callback) {
 				callback(null, new Buffer('tile', 'utf8'), {'X-Test':'1'});
 			}});
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
-			testMiddleware(middleware, '/basemap/3/2/1/file.txt', true, null, done);
+			testMiddleware(middleware, '/basemap/3/2/1.txt', true, null, done);
 		});
 	});
 });
