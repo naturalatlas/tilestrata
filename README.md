@@ -46,16 +46,16 @@ var strata = tilestrata.createServer();
 
 // define layers
 strata.layer('basemap')
-    .route('tile@2x.png')
+    .route('@2x.png')
         .use(disk({dir: '/var/lib/tiles/basemap'}))
         .use(mapnik({
             xml: '/path/to/map.xml',
             tileSize: 512,
             scale: 2
         }))
-    .route('tile.png')
+    .route('.png')
         .use(disk({dir: '/var/lib/tiles/basemap'}))
-        .use(dependency('basemap', 'tile@2x.png'))
+        .use(dependency('basemap', '@2x.png'))
         .use(sharp(function(image, sharp) {
             return image.resize(256);
         }));
@@ -67,7 +67,7 @@ strata.listen(8080);
 Once configured and started, tiles can be accessed via:
 
 ```
-/:layer/:z/:x:/:y/:filename
+/:layer/:z/:x/:filename
 ```
 
 ### Integrate with [Express.js](http://expressjs.com/) / [Connect](https://github.com/senchalabs/connect)

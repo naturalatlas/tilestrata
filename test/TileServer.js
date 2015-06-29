@@ -58,9 +58,9 @@ describe('TileServer', function() {
 		});
 		it('should return a 404 status is request outside of minZoom', function(done) {
 			var server = new TileServer();
-			server.layer('layer', {minZoom: 10}).route('tile.png').use(noop_provider);
+			server.layer('layer', {minZoom: 10}).route('.png').use(noop_provider);
 
-			var req = TileRequest.parse('/layer/9/781/1469/tile.png', {}, 'GET');
+			var req = TileRequest.parse('/layer/9/781/1469.png', {}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
@@ -69,9 +69,9 @@ describe('TileServer', function() {
 		});
 		it('should return a 404 status is request outside of maxZoom', function(done) {
 			var server = new TileServer();
-			server.layer('layer', {maxZoom: 10}).route('tile.png').use(noop_provider);
+			server.layer('layer', {maxZoom: 10}).route('.png').use(noop_provider);
 
-			var req = TileRequest.parse('/layer/11/781/1469/tile.png', {}, 'GET');
+			var req = TileRequest.parse('/layer/11/781/1469.png', {}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
@@ -80,9 +80,9 @@ describe('TileServer', function() {
 		});
 		it('should return a 200 status is request inside of minZoom,maxZoom', function(done) {
 			var server = new TileServer();
-			server.layer('layer', {minZoom: 10, maxZoom: 10}).route('tile.png').use(noop_provider);
+			server.layer('layer', {minZoom: 10, maxZoom: 10}).route('.png').use(noop_provider);
 
-			var req = TileRequest.parse('/layer/10/781/1469/tile.png', {}, 'GET');
+			var req = TileRequest.parse('/layer/10/781/1469.png', {}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				done();
@@ -96,10 +96,10 @@ describe('TileServer', function() {
 				45.47746617959318
 			];
 			var server = new TileServer();
-			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use(noop_provider);
+			server.layer('layer', {bbox: valid_bbox}).route('.png').use(noop_provider);
 
 			var tile_outside = '12/781/1469';
-			var req = TileRequest.parse('/layer/' + tile_outside + '/tile.png', {}, 'GET');
+			var req = TileRequest.parse('/layer/' + tile_outside + '.png', {}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
@@ -114,14 +114,14 @@ describe('TileServer', function() {
 				45.47746617959318
 			];
 			var server = new TileServer();
-			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use({
+			server.layer('layer', {bbox: valid_bbox}).route('.png').use({
 				serve: function(server, req, callback) {
 					callback(null, new Buffer('Valid'), {});
 				}
 			});
 
 			var tile_inside = '14/3129/5867';
-			var req = TileRequest.parse('/layer/' + tile_inside + '/tile.png', {}, 'GET');
+			var req = TileRequest.parse('/layer/' + tile_inside + '.png', {}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'Valid');
@@ -130,7 +130,7 @@ describe('TileServer', function() {
 		});
 		it('should return a 404 status if no handlers found', function(done) {
 			var server = new TileServer();
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {}, 'GET');
+			var req = TileRequest.parse('/layer/1/2/3.png', {}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 404);
 				assert.equal(buffer.toString('utf8'), 'Not found');
@@ -143,8 +143,8 @@ describe('TileServer', function() {
 		});
 		it('should return a 501 status if no methods match', function(done) {
 			var server = new TileServer();
-			server.layer('layer').route('tile.png');
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {}, 'INVALID');
+			server.layer('layer').route('.png');
+			var req = TileRequest.parse('/layer/1/2/3.png', {}, 'INVALID');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 501);
 				assert.equal(buffer.toString('utf8'), 'Not implemented');
@@ -157,29 +157,29 @@ describe('TileServer', function() {
 		});
 		it('should pass through headers to handler', function(done) {
 			var server = new TileServer();
-			server.layer('layer').route('tile.png').use({
+			server.layer('layer').route('.png').use({
 				serve: function(_server, _req, callback) {
 					assert.deepEqual(_req.headers, {'x-tilestrata-skipcache':'1'});
 					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache':'1'}, 'GET');
+			var req = TileRequest.parse('/layer/1/2/3.png', {'x-tilestrata-skipcache':'1'}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				done();
 			});
 		});
 		it('should return a 200 status if layer handler succeeds', function(done) {
 			var server = new TileServer();
-			server.layer('layer').route('tile.png').use({
+			server.layer('layer').route('.png').use({
 				serve: function(_server, _req, callback) {
 					assert.equal(_server, server);
 					assert.instanceOf(_req, TileRequest);
-					assert.equal(_req.filename, 'tile.png');
+					assert.equal(_req.filename, '3.png');
 					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {}, 'GET');
+			var req = TileRequest.parse('/layer/1/2/3.png', {}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'response');
@@ -195,7 +195,7 @@ describe('TileServer', function() {
 		});
 		it('should return a 500 status if a hook fails', function(done) {
 			var server = new TileServer();
-			server.layer('layer').route('tile.png')
+			server.layer('layer').route('.png')
 				.use({
 					serve: function(_server, _req, callback) {
 						callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
@@ -207,7 +207,7 @@ describe('TileServer', function() {
 					}
 				});
 
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {}, 'GET');
+			var req = TileRequest.parse('/layer/1/2/3.png', {}, 'GET');
 			server.serve(req, {req: {}, res: {}}, function(status, buffer, headers) {
 				assert.equal(status, 500);
 				assert.equal(buffer.toString('utf8'), 'The hook failed');
@@ -223,12 +223,12 @@ describe('TileServer', function() {
 		});
 		it('should return a 500 status if layer handler fails', function(done) {
 			var server = new TileServer();
-			server.layer('layer').route('tile.png').use({
+			server.layer('layer').route('.png').use({
 				serve: function(_server, _req, callback) {
 					callback(new Error('Something went wrong'));
 				}
 			});
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {}, 'GET');
+			var req = TileRequest.parse('/layer/1/2/3.png', {}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 500);
 				assert.equal(buffer.toString('utf8'), 'Something went wrong');
@@ -241,16 +241,16 @@ describe('TileServer', function() {
 		});
 		it('should return a 200 status if If-None-Match does not match ETag', function(done) {
 			var server = new TileServer();
-			server.layer('layer').route('tile.png').use({
+			server.layer('layer').route('.png').use({
 				serve: function(_server, _req, callback) {
 					assert.equal(_server, server);
 					assert.instanceOf(_req, TileRequest);
-					assert.equal(_req.filename, 'tile.png');
+					assert.equal(_req.filename, '3.png');
 					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {'if-none-match': '"1fbOrzaTe+DDuoz+Ciwb/g=="'}, 'GET');
+			var req = TileRequest.parse('/layer/1/2/3.png', {'if-none-match': '"1fbOrzaTe+DDuoz+Ciwb/g=="'}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'response');
@@ -266,16 +266,16 @@ describe('TileServer', function() {
 		});
 		it('should return a 304 status if If-None-Match matches ETag', function(done) {
 			var server = new TileServer();
-			server.layer('layer').route('tile.png').use({
+			server.layer('layer').route('.png').use({
 				serve: function(_server, _req, callback) {
 					assert.equal(_server, server);
 					assert.instanceOf(_req, TileRequest);
-					assert.equal(_req.filename, 'tile.png');
+					assert.equal(_req.filename, '3.png');
 					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {'if-none-match': '"8-0fyOrzaTe+DDuoz+Ciwb/g"'}, 'GET');
+			var req = TileRequest.parse('/layer/1/2/3.png', {'if-none-match': '"8-0fyOrzaTe+DDuoz+Ciwb/g"'}, 'GET');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 304);
 				assert.equal(buffer.toString('utf8'), '');
@@ -291,16 +291,16 @@ describe('TileServer', function() {
 		});
 		it('should omit body if a HEAD request', function(done) {
 			var server = new TileServer();
-			server.layer('layer').route('tile.png').use({
+			server.layer('layer').route('.png').use({
 				serve: function(_server, _req, callback) {
 					assert.equal(_server, server);
 					assert.instanceOf(_req, TileRequest);
-					assert.equal(_req.filename, 'tile.png');
+					assert.equal(_req.filename, '3.png');
 					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {}, 'HEAD');
+			var req = TileRequest.parse('/layer/1/2/3.png', {}, 'HEAD');
 			server.serve(req, false, function(status, buffer, headers) {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), '');
@@ -325,7 +325,7 @@ describe('TileServer', function() {
 			var headWritten = 0;
 			var bodyWritten = 0;
 
-			var mockReq = {method: 'GET', url: '/layer/1/2/3/tile.png', headers: {}};
+			var mockReq = {method: 'GET', url: '/layer/1/2/3.png', headers: {}};
 			var mockRes = {
 				writeHead: function(status, headers) {
 					headWritten++;
@@ -358,12 +358,12 @@ describe('TileServer', function() {
 			var server = new TileServer();
 			var layer = server.layer('layer');
 
-			layer.route('tile.png')
+			layer.route('.png')
 				.use({
 					serve: function(_server, _req, callback) {
 						assert.equal(_server, server);
 						assert.instanceOf(_req, TileRequest);
-						assert.equal(_req.filename, 'tile.png');
+						assert.equal(_req.filename, '3.png');
 						callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
 					}
 				})
@@ -417,7 +417,7 @@ describe('TileServer', function() {
 		it('should return error if tile unavailable', function(done) {
 			var _served = false;
 			var server = new TileServer();
-			var layer = server.layer('layer').route('tile.png').use({
+			var layer = server.layer('layer').route('.png').use({
 				serve: function(_server, _req, callback) {
 					_served = true;
 					assert.equal(_req.x, 2);
@@ -427,7 +427,7 @@ describe('TileServer', function() {
 				}
 			});
 
-			server.getTile('layer', 'tile.png', 2, 3, 1, function(err, buffer, headers) {
+			server.getTile('layer', '3.png', 2, 3, 1, function(err, buffer, headers) {
 				assert.isTrue(_served);
 				assert.instanceOf(err, Error);
 				assert.equal(err.message, 'It didn\'t work');
@@ -439,7 +439,7 @@ describe('TileServer', function() {
 		it('should return tile if available', function(done) {
 			var _served = false;
 			var server = new TileServer();
-			server.layer('layer').route('tile.png').use({
+			server.layer('layer').route('.png').use({
 				serve: function(_server, _req, callback) {
 					_served = true;
 					assert.equal(_req.x, 2);
@@ -449,7 +449,7 @@ describe('TileServer', function() {
 				}
 			});
 
-			server.getTile('layer', 'tile.png', 2, 3, 1, function(err, buffer, headers) {
+			server.getTile('layer', '3.png', 2, 3, 1, function(err, buffer, headers) {
 				assert.isTrue(_served);
 				assert.isNull(err);
 				assert.instanceOf(buffer, Buffer);
@@ -474,7 +474,7 @@ describe('TileServer', function() {
 			var server = new TileServer();
 
 			server.layer('layer1')
-				.route('tile.png').use({
+				.route('.png').use({
 					init: function(_server, callback) {
 						_layer1_provider1 = true;
 						assert.equal(_server, server);
@@ -492,7 +492,7 @@ describe('TileServer', function() {
 				});
 
 			server.layer('layer2')
-				.route('tile.png').use({
+				.route('.png').use({
 					init: function(_server, callback) {
 						_layer2_provider1 = true;
 						assert.equal(_server, server);
@@ -519,7 +519,7 @@ describe('TileServer', function() {
 
 			var server = new TileServer();
 			server.layer('layer1')
-				.route('tile.png')
+				.route('.png')
 					.use({serve: function() {}})
 					.use({
 						init: function(_server, callback) {
@@ -541,7 +541,7 @@ describe('TileServer', function() {
 					});
 
 			server.layer('layer2')
-				.route('tile.png')
+				.route('.png')
 					.use({serve: function() {}})
 					.use({
 						init: function(_server, callback) {
@@ -569,7 +569,7 @@ describe('TileServer', function() {
 
 			var server = new TileServer();
 			server.layer('layer1')
-				.route('tile.png')
+				.route('.png')
 					.use({serve: function() {}})
 					.use({
 						init: function(_server, callback) {
@@ -593,7 +593,7 @@ describe('TileServer', function() {
 					});
 
 			server.layer('layer2')
-				.route('tile.png')
+				.route('.png')
 					.use({serve: function() {}})
 					.use({
 						init: function(_server, callback) {
@@ -620,7 +620,7 @@ describe('TileServer', function() {
 		it('should start server on specified port', function(done) {
 			var server = new TileServer();
 
-			server.layer('mylayer').route('tile.txt').use({serve: function(server, req, callback) {
+			server.layer('mylayer').route('.txt').use({serve: function(server, req, callback) {
 				var message = 'hello x: ' + req.x + ' y: ' + req.y + ' z: ' + req.z;
 				callback(null, new Buffer(message, 'utf8'), {
 					'Content-Type': 'text/plain',
@@ -630,7 +630,7 @@ describe('TileServer', function() {
 
 			server.listen(8889, function(err) {
 				assert.isFalse(!!err, 'Unexpected error: ' + (err ? (err.message || err) : ''));
-				http.get('http://localhost:8889/mylayer/3/2/1/tile.txt', function(res) {
+				http.get('http://localhost:8889/mylayer/3/2/1.txt', function(res) {
 					var body = '';
 					res.on('data', function(data) { body += data; });
 					res.on('end', function() {

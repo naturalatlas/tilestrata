@@ -341,7 +341,7 @@ describe('TileRequestHandler', function() {
 	describe('GET()', function() {
 		it('it should hit caches first', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler();
 			var _cache1_called = false;
 			var _cache2_called = false;
@@ -382,7 +382,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should ignore any cache errors and fallback to provider', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler();
 			var _cache_called = false;
 
@@ -408,7 +408,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should skip transforms if provider fails', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler();
 
 			handler.use({
@@ -435,7 +435,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should return 500 status if transform fails (and skip cache set)', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler();
 
 			handler.use({
@@ -470,7 +470,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should execute transforms after provider, and then cache transform result', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler();
 			var _cache_called = false;
 
@@ -519,7 +519,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should skip caching and return 500 status when provider fails', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler();
 
 			handler.use({
@@ -540,7 +540,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should should acknowledge "race" cacheFetchMode', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler({cacheFetchMode: 'race'});
 			var _cache1_called = false;
 			var _cache1_finished = false;
@@ -576,7 +576,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should attempt to cache after successful provider result', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler();
 
 			var _cache_set_calls = 0;
@@ -618,7 +618,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should handle no caches fine', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler();
 			handler.use({
 				serve: function(server, req, callback) {
@@ -639,7 +639,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should return 404 status when no provider configured', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png');
 			var handler = new TileRequestHandler();
 			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
 				assert.equal(status, 404);
@@ -650,8 +650,8 @@ describe('TileRequestHandler', function() {
 		});
 		it('should batch identical requests while busy fetching', function(done) {
 			var mockServer = new TileServer();
-			var req1 = TileRequest.parse('/layer/1/2/3/tile.png');
-			var req2 = TileRequest.parse('/layer/1/2/3/tile.png');
+			var req1 = TileRequest.parse('/layer/1/2/3.png');
+			var req2 = TileRequest.parse('/layer/1/2/3.png');
 			var _calls_provider = 0;
 			var _responses = 0;
 
@@ -683,7 +683,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should should wait for cache to be set before returning if "X-TileStrata-CacheWait" header present', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-cachewait':'1'});
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png', {'x-tilestrata-cachewait':'1'});
 			var handler = new TileRequestHandler();
 			var cache_set = false;
 
@@ -717,7 +717,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should skip cache get if "X-TileStrata-SkipCache" header present and matches (wildcard)', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': '*'});
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png', {'x-tilestrata-skipcache': '*'});
 			var handler = new TileRequestHandler();
 
 			handler.use({
@@ -745,7 +745,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should skip cache get if "X-TileStrata-SkipCache" header present and matches', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': 'a/tile.png,layer/tile.png'});
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png', {'x-tilestrata-skipcache': 'a/3.png,layer/3.png'});
 			var handler = new TileRequestHandler();
 
 			handler.use({
@@ -773,7 +773,7 @@ describe('TileRequestHandler', function() {
 		});
 		it('should not skip cache get if "X-TileStrata-SkipCache" header present and does not match', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': 'layer/tile.pnggg'});
+			var mockRequest = TileRequest.parse('/layer/1/2/3.png', {'x-tilestrata-skipcache': '/layer/3.pnggg'});
 			var handler = new TileRequestHandler();
 
 			var _cache_get_calls = 0;
