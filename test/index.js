@@ -27,7 +27,7 @@ describe('require("tilestrata")', function() {
 	describe('middleware()', function() {
 		function testMiddleware(middleware, requrl, expect_next, expected_details, callback) {
 			var next = function(err) {
-				assert.isFalse(!!err);
+				if (err) throw err;
 				if (expect_next) callback();
 				else throw new Error('Unexpected "next" call');
 			};
@@ -51,8 +51,8 @@ describe('require("tilestrata")', function() {
 				},
 				end: function() {
 					if (expect_next) throw new Error('Unexpected "end" call');
-					assert.isTrue(_writeHead_called);
-					assert.isTrue(_write_called);
+					assert.isTrue(_writeHead_called, 'writeHead called by end');
+					assert.isTrue(_write_called, 'write called by end');
 					callback();
 				}
 			};
@@ -108,6 +108,42 @@ describe('require("tilestrata")', function() {
 			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {status: 200, headers: expected_headers, buffer: new Buffer('tile', 'utf8')}, function() {
 				assert.isTrue(reqhook_called, 'Request hook called');
 				assert.isTrue(reshook_called, 'Response hook called');
+				done();
+			});
+		});
+		it('should should initialize plugins', function(done) {
+			var reqhook_called = false;
+			var reshook_called = false;
+
+			var expected_headers = {
+				'X-Powered-By': 'TileStrata/' + version,
+				'Content-Length': 4,
+				'Cache-Control': 'max-age=60',
+				'ETag': '"4-sya1BisvDmkEaBBxdTTLCQ"'
+			};
+
+			var initCalled = false;
+
+			var server = new TileServer();
+			server.layer('basemap').route('file.txt')
+				.use({
+					init: function(server, callback) {
+						setTimeout(function() {
+							initCalled = true;
+							callback();
+						}, 100);
+					},
+					serve: function(server, req, callback) {
+						callback(null, new Buffer(String(initCalled), 'utf8'), {});
+					}
+				});
+
+			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
+			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {
+				status: 200,
+				headers: expected_headers,
+				buffer: new Buffer('true', 'utf8')
+			}, function() {
 				done();
 			});
 		});

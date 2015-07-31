@@ -16,7 +16,16 @@ module.exports.middleware = function(options) {
 		throw new Error('"server" option required, and must be a TileServer instance');
 	}
 
-	return function(req, res, next) {
+	var pendingRequests = [];
+	server.initialize(function(err) {
+		if (err) throw err;
+		while (pendingRequests.length) {
+			var args = pendingRequests.shift();
+			handleRequest(args[0], args[1], args[2]);
+		}
+	});
+
+	function handleRequest(req, res, next) {
 		var url = req.url;
 		if (url.substring(0, prefix_len) === prefix) {
 			url = url.substring(prefix_len);
@@ -31,5 +40,14 @@ module.exports.middleware = function(options) {
 			res.write(buffer);
 			res.end();
 		});
+	}
+
+	return function(req, res, next) {
+		if (!server.initialized) {
+			var args = Array.prototype.slice.call(arguments);
+			pendingRequests.push(args);
+		} else {
+			handleRequest(req, res, next);
+		}
 	};
 };
