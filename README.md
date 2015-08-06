@@ -11,13 +11,15 @@ $ npm install tilestrata --save
 
 ### Introduction
 
-TileStrata consists of three main actors, usually implemented as plugins:
+TileStrata consists of five main actors, usually implemented as plugins:
 
 - [*"provider"*](#writing-providers) – Generates a new tile (e.g mapnik)
 - [*"cache"*](#writing-caches) – Persists a tile for later requests (e.g. filesystem)
 - [*"transform"*](#writing-tranforms) – Takes a raw tile and transforms it (e.g. image scaling / compression)
 - [*"request hook"*](#writing-request-hooks) – Called at the very beginning of a tile request.
 - [*"response hook"*](#writing-response-hooks) – Called right before a tile is served to the client.
+
+<img src="https://cdn.rawgit.com/naturalatlas/tilestrata/master/graphics/flow.svg" width="700" />
 
 #### List of Plugins
 

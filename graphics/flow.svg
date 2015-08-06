@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="795px" height="85.7px" viewBox="0 0 795 85.7" enable-background="new 0 0 795 85.7" xml:space="preserve">
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" x1="390.6" y1="18.8" x2="375.6" y2="18.8"/>
+		<g>
+			<polygon points="399.1,18.8 387.5,14.1 390.3,18.8 387.5,23.5 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" x1="258.6" y1="18.8" x2="243.6" y2="18.8"/>
+		<g>
+			<polygon points="267.1,18.8 255.5,14.1 258.3,18.8 255.5,23.5 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<path fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" d="M230.6,36.7H127.1c-9.8,0-17.8-8-17.8-17.8v0
+		c0-9.8,8-17.8,17.8-17.8l103.6,0c9.8,0,17.8,8,17.8,17.8v0C248.5,28.7,240.5,36.7,230.6,36.7z"/>
+	<text transform="matrix(1 0 0 1 127.9121 22.8281)" font-family="'Helvetica-Bold'" font-size="14px">Request Hooks</text>
+</g>
+<path fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" d="M362.8,36.7h-77.9c-9.8,0-17.8-8-17.8-17.8v0
+	c0-9.8,8-17.8,17.8-17.8h77.9c9.8,0,17.8,8,17.8,17.8v0C380.6,28.7,372.7,36.7,362.8,36.7z"/>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" x1="515.8" y1="60.6" x2="492" y2="32.2"/>
+		<g>
+			<polygon points="521.1,66.8 517.3,55 515.4,60.1 510.1,61 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" x1="512.6" y1="18.8" x2="497.6" y2="18.8"/>
+		<g>
+			<polygon points="521.1,18.8 509.5,14.1 512.3,18.8 509.5,23.5 			"/>
+		</g>
+	</g>
+</g>
+<text transform="matrix(1 0 0 1 289.2432 22.8281)" font-family="'Helvetica-Bold'" font-size="14px">Cache Get</text>
+<path fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" d="M484.9,36.7h-67.9c-9.8,0-17.8-8-17.8-17.8v0
+	c0-9.8,8-17.8,17.8-17.8h67.9c9.8,0,17.8,8,17.8,17.8v0C502.7,28.7,494.7,36.7,484.9,36.7z"/>
+<text transform="matrix(1 0 0 1 422.4829 22.8281)" font-family="'Helvetica-Bold'" font-size="14px">Provider</text>
+<path fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" d="M616.8,36.7h-77.9c-9.8,0-17.8-8-17.8-17.8v0
+	c0-9.8,8-17.8,17.8-17.8h77.9c9.8,0,17.8,8,17.8,17.8v0C634.6,28.7,626.7,36.7,616.8,36.7z"/>
+<text transform="matrix(1 0 0 1 544.019 22.8281)" font-family="'Helvetica-Bold'" font-size="14px">Cache Set</text>
+<path fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" d="M659.5,84.7H538.9c-9.8,0-17.8-8-17.8-17.8v0
+	c0-9.8,8-17.8,17.8-17.8h120.6c9.8,0,17.8,8,17.8,17.8v0C677.4,76.7,669.4,84.7,659.5,84.7z"/>
+<text transform="matrix(1 0 0 1 542.4297 70.8281)" font-family="'Helvetica-Bold'" font-size="14px">Response Hooks</text>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" x1="89.6" y1="20.8" x2="66.6" y2="20.8"/>
+		<g>
+			<polygon points="108.6,20.8 81.6,9.8 88,20.8 81.6,31.9 			"/>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" x1="700.6" y1="66.8" x2="677.6" y2="66.8"/>
+		<g>
+			<polygon points="719.6,66.8 692.6,55.8 699,66.8 692.6,77.9 			"/>
+		</g>
+	</g>
+</g>
+<text transform="matrix(1 0 0 1 0 25.8281)" font-family="'Helvetica-Bold'" font-size="14px">Request</text>
+<text transform="matrix(1 0 0 1 728.1172 70.8282)" font-family="'Helvetica-Bold'" font-size="14px">Response</text>
+</svg>
