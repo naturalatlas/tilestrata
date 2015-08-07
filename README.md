@@ -19,7 +19,7 @@ TileStrata consists of five main actors, usually implemented as plugins:
 - [*"request hook"*](#writing-request-hooks) – Called at the very beginning of a tile request.
 - [*"response hook"*](#writing-response-hooks) – Called right before a tile is served to the client.
 
-<img src="https://cdn.rawgit.com/naturalatlas/tilestrata/master/graphics/flowdiagram.svg" width="760" />
+<img src="https://cdn.rawgit.com/naturalatlas/tilestrata/master/graphics/reqflow.svg" width="760" />
 
 #### List of Plugins
 
