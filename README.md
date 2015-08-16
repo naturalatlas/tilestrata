@@ -24,7 +24,7 @@ TileStrata consists of five main actors, usually implemented as plugins:
 #### List of Plugins
 
 - [tilestrata-mapnik](https://github.com/naturalatlas/tilestrata-mapnik) – Render tiles with [mapnik](http://mapnik.org/).
-- [tilestrata-disk](https://github.com/naturalatlas/tilestrata-disk) – Cache map tiles to the filesystem.
+- [tilestrata-disk](https://github.com/naturalatlas/tilestrata-disk) – Cache map tiles to the filesystem (or serve from it)
 - [tilestrata-dependency](https://github.com/naturalatlas/tilestrata-dependency) – Fetch tiles from other layers.
 - [tilestrata-sharp](https://github.com/naturalatlas/tilestrata-sharp) – Compress, resize, transcode tiles (jpg, png, webp) using [libvips](https://www.npmjs.com/package/sharp).
 - [tilestrata-gm](https://github.com/naturalatlas/tilestrata-gm) – Perform all sorts of image operations on tiles using [GraphicsMagick](https://www.npmjs.com/package/gm).
