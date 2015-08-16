@@ -406,6 +406,22 @@ describe('TileRequestHandler', function() {
 				done();
 			});
 		});
+		it('should return statusCode attached to provider error if available', function(done) {
+			var mockServer = new TileServer();
+			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var handler = new TileRequestHandler();
+			handler.use({
+				serve: function(server, req, callback) {
+					var err = new Error('My error');
+					err.statusCode = 999;
+					callback(err);
+				}
+			});
+			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
+				assert.equal(status, 999);
+				done();
+			});
+		});
 		it('should skip transforms if provider fails', function(done) {
 			var mockServer = new TileServer();
 			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
