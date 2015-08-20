@@ -35,6 +35,7 @@ TileStrata consists of five main actors, usually implemented as plugins:
 - [tilestrata-utfmerge](https://github.com/naturalatlas/tilestrata-utfmerge) – Merge UTF interactivity grids from mapnik.
 - [tilestrata-vtile](https://github.com/naturalatlas/tilestrata-vtile) – Outputs mapnik vector tiles (protobufs).
 - [tilestrata-vtile-raster](https://github.com/naturalatlas/tilestrata-vtile-raster) – Renders mapnik vector tiles into raster images.
+- [tilestrata-vtile-composite](https://github.com/naturalatlas/tilestrata-vtile-composite) – Merge multiple vector tiles.
 - [tilestrata-proxy](https://github.com/naturalatlas/tilestrata-proxy) – Fetches tiles from other servers
 
 ## Configuration
