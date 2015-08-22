@@ -28,6 +28,12 @@ describe('TileRequestHandler', function() {
 		});
 	});
 	describe('use()', function() {
+		it('should ignore falsy values', function() {
+			var handler = new TileRequestHandler();
+			assert.equal(handler.use(null), handler);
+			assert.equal(handler.use(false), handler);
+			assert.equal(handler.use(), handler);
+		});
 		it('should allow chaining', function() {
 			var handler = new TileRequestHandler();
 			var _plugin = {serve: function() {}};
