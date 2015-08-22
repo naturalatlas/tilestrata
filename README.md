@@ -116,6 +116,10 @@ In advanced use cases, it might be necessary for tiles to not be returned by the
 X-TileStrata-CacheWait:1
 ```
 
+## Health Checks
+
+TileStrata includes a very basic `/health` endpoint that will return a `200 OK` if it can accept connections.
+
 ## API Reference
 
 #### [TileServer](#tileserver)

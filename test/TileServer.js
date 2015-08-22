@@ -645,12 +645,12 @@ describe('TileServer', function() {
 				});
 			});
 		});
-		describe('robots.txt', function() {
+		describe('/robots.txt', function() {
 			it('should disallow indexing', function(done) {
 				var server = new TileServer();
 
 				server.listen(8887, function(err) {
-					assert.isFalse(!!err, 'Unexpected error: ' + (err ? (err.message || err) : ''));
+					if (err) throw err;
 					http.get('http://localhost:8887/robots.txt', function(res) {
 						var body = '';
 						res.on('data', function(data) { body += data; });
@@ -659,6 +659,28 @@ describe('TileServer', function() {
 							var expected = 'User-agent: *\nDisallow: /\n';
 							assert.equal(body, expected);
 							assert.equal(res.headers['content-type'], 'text/plain');
+							assert.equal(res.headers['content-length'], expected.length);
+							done();
+						});
+					});
+				});
+			});
+		});
+		describe('/health', function() {
+			it('should return a 200 OK', function(done) {
+				var server = new TileServer();
+				var pkg = require('../package.json');
+
+				server.listen(8888, function(err) {
+					if (err) throw err;
+					http.get('http://localhost:8888/health', function(res) {
+						var body = '';
+						res.on('data', function(data) { body += data; });
+						res.on('end', function() {
+							assert.equal(res.statusCode, 200);
+							var expected = '{"ok":true,"version":"'+pkg.version+'"}';
+							assert.equal(body, expected);
+							assert.equal(res.headers['content-type'], 'application/json');
 							assert.equal(res.headers['content-length'], expected.length);
 							done();
 						});
