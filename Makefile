@@ -4,6 +4,12 @@ _MOCHA=node_modules/.bin/_mocha
 ISTANBUL=node_modules/.bin/istanbul
 CODECOV=node_modules/.bin/codecov
 
+authors:
+	git shortlog -se \
+	  | perl -spe 's/^\s+\d+\s+//' \
+	  | sed -e '/brianreavis/d' \
+	  > AUTHORS
+
 test:
 	npm run test-ci
 
