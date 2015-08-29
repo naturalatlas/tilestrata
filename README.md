@@ -190,13 +190,19 @@ module.exports = function(options) {
             callback(err);
         },
         get: function(server, tile, callback) {
-            callback(err, buffer, headers);
+            callback(err, buffer, headers, /* refresh */);
         },
         set: function(server, tile, buffer, headers, callback) {
             callback(err);
         }
     };
 };
+```
+
+A special behavior exists for when a cache returns a hit, but wants a new tile to be generated in the background. The use case: you have tile that's old enough it *should* be regenerated, but it's not old enough to warrant making the user wait for a new tile to be rendered. To accomplish this in a plugin, have `get()` return `true` as the fourth argument to the callback.
+
+```js
+callback(null, buffer, headers, true);
 ```
 
 ### Writing Providers

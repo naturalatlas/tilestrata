@@ -596,6 +596,52 @@ describe('TileRequestHandler', function() {
 				done();
 			});
 		});
+		it('should refresh tile in background if any of the caches return true for "refresh" arg on callback', function(done) {
+			var _responded = false;
+			var _cache_set_calls = 0;
+
+			var mockServer = new TileServer();
+			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
+			var handler = new TileRequestHandler();
+			var assertCacheSet = function(server, req, buffer, headers, callback) {
+				_cache_set_calls++;
+				assert.isTrue(_responded, 'Set should happen after response sent');
+				assert.equal(buffer.toString('utf8'), 'thedata');
+				assert.deepEqual(headers, {'X-Step': 'provider'});
+				callback();
+				if (_cache_set_calls === 2) {
+					done();
+				}
+			};
+
+			handler.use({
+				get: function(server, req, callback) { callback(); },
+				set: assertCacheSet
+			});
+
+			handler.use({
+				get: function(server, req, callback) {
+					var cacheData = new Buffer('cachedata', 'utf8');
+					var cacheHeaders = {'X-Step': 'cache'};
+					callback(null, cacheData, cacheHeaders, true);
+				},
+				set: assertCacheSet
+			});
+
+			handler.use({
+				serve: function(server, req, callback) {
+					var _buffer = new Buffer('thedata', 'utf8');
+					callback(null, _buffer, {'X-Step': 'provider'});
+				}
+			});
+
+			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
+				_responded = true;
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'cachedata');
+				assert.deepEqual(headers, {'X-Step': 'cache', 'X-TileStrata-CacheHit': '1'});
+			});
+		});
 		it('should attempt to cache after successful provider result', function(done) {
 			var mockServer = new TileServer();
 			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png');
