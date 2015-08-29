@@ -2,20 +2,20 @@
 
 _MOCHA=node_modules/.bin/_mocha
 ISTANBUL=node_modules/.bin/istanbul
-COVERALLS=node_modules/.bin/coveralls
+CODECOV=node_modules/.bin/codecov
 
 test:
 	npm run test-ci
 
 test-ci-coverage:
-	npm install coveralls
+	npm install codecov.io
 	npm install istanbul
 	@rm -rf coverage
 	$(ISTANBUL) cover $(_MOCHA) --report lcovonly -- -R tap
 
 	@echo
-	@echo Sending report to coveralls.io...
-	@cat ./coverage/lcov.info | $(COVERALLS)
+	@echo Sending report to codecov...
+	@cat ./coverage/lcov.info | $(CODECOV)
 	@rm -rf ./coverage
 	@echo Done
 

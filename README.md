@@ -1,7 +1,7 @@
 # TileStrata
 [![NPM version](http://img.shields.io/npm/v/tilestrata.svg?style=flat)](https://www.npmjs.org/package/tilestrata)
 [![Build Status](http://img.shields.io/travis/naturalatlas/tilestrata/master.svg?style=flat)](https://travis-ci.org/naturalatlas/tilestrata)
-[![Coverage Status](http://img.shields.io/coveralls/naturalatlas/tilestrata/master.svg?style=flat)](https://coveralls.io/r/naturalatlas/tilestrata)
+[![Coverage Status](http://img.shields.io/codecov/c/github/naturalatlas/tilestrata/master.svg?style=flat)](https://codecov.io/github/naturalatlas/tilestrata)
 
 TileStrata is a pluggable "slippy map" tile server that emphasizes code-as-configuration. It's clean, highly tested, and performant. After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js. The primary goal is painless extendability.
 
