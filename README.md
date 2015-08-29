@@ -118,7 +118,18 @@ X-TileStrata-CacheWait:1
 
 ## Health Checks
 
-TileStrata includes a very basic `/health` endpoint that will return a `200 OK` if it can accept connections.
+TileStrata includes a `/health` endpoint that will return a `200 OK` if it can accept connections. The response will always be JSON. By setting `strata.healthy` to a function that accepts a callback you can take it a step further and control the status and data that it returns.
+
+```js
+// not healthy
+strata.healthy = function(callback) {
+    callback(new Error('CPU is too high'), {loadavg: 3});
+};
+// healthy
+strata.healthy = function(callback) {
+    callback(null, {loadavg: 1});
+};
+```
 
 ## API Reference
 
