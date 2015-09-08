@@ -141,7 +141,7 @@ Starts accepting requests on the specified port. The arguments to this method ar
 ##### server.layer(name, [opts])
 Registers a new layer with the given name and returns its [TileLayer](#tilelayer) instance. If the layer already exists, the existing instance will be returned. Whatever name is used will be the first part of the url that can be used to fetch tiles: `/:layer/...`. The following options can be provided:
 
-  - **bbox**: A bounding box ([GeoJSON "bbox" format](http://geojson.org/geojson-spec.html#bounding-boxes)) that defines the valid extent of the layer. Any requests for tiles outside of this region will result in a 404 Not Found.
+  - **bbox**: A bounding box ([GeoJSON "bbox" format](http://geojson.org/geojson-spec.html#bounding-boxes)) that defines the valid extent of the layer. Any requests for tiles outside of this region will result in a 404 Not Found. This option can also be set to an array of bounding boxes for rare cases when a layer is noncontinuous.
   - **minZoom**: The minimum `z` to return tiles for. Anything lesser will return a 404 Not Found.
   - **maxZoom**: The maximum `z` to return tiles for. Anything greater will return a 404 Not Found.
 

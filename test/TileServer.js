@@ -107,6 +107,24 @@ describe('TileServer', function() {
 				done();
 			});
 		});
+		it('should return a 404 status is request outside of layer bboxes', function(done) {
+			var valid_bbox = [[1,1,-1,1],[
+				-111.37390136718749,
+				45.3297027614069,
+				-111.11228942871094,
+				45.47746617959318
+			]];
+			var server = new TileServer();
+			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use(noop_provider);
+
+			var tile_outside = '12/781/1469';
+			var req = TileRequest.parse('/layer/' + tile_outside + '/tile.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 404);
+				assert.equal(buffer.toString('utf8'), 'Not found');
+				done();
+			});
+		});
 		it('should return a 200 status is request inside of layer bbox', function(done) {
 			var valid_bbox = [
 				-111.37390136718749,
@@ -114,6 +132,28 @@ describe('TileServer', function() {
 				-111.11228942871094,
 				45.47746617959318
 			];
+			var server = new TileServer();
+			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use({
+				serve: function(server, req, callback) {
+					callback(null, new Buffer('Valid'), {});
+				}
+			});
+
+			var tile_inside = '14/3129/5867';
+			var req = TileRequest.parse('/layer/' + tile_inside + '/tile.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'Valid');
+				done();
+			});
+		});
+		it('should return a 200 status is request inside of layer bboxes', function(done) {
+			var valid_bbox = [[1,1,-1,1],[
+				-111.37390136718749,
+				45.3297027614069,
+				-111.11228942871094,
+				45.47746617959318
+			]];
 			var server = new TileServer();
 			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use({
 				serve: function(server, req, callback) {
