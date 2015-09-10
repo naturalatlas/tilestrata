@@ -37,6 +37,7 @@ TileStrata consists of five main actors, usually implemented as plugins:
 - [tilestrata-vtile-raster](https://github.com/naturalatlas/tilestrata-vtile-raster) – Renders mapnik vector tiles into raster images.
 - [tilestrata-vtile-composite](https://github.com/naturalatlas/tilestrata-vtile-composite) – Merge multiple vector tiles.
 - [tilestrata-proxy](https://github.com/naturalatlas/tilestrata-proxy) – Fetches tiles from other servers
+- [tilestrata-lru](https://github.com/naturalatlas/tilestrata-lru) – Caches tiles in memory (LRU)
 
 ## Configuration
 
