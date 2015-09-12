@@ -91,6 +91,7 @@ describe('profiling', function() {
 			async.eachSeries(reqs, function(req, callback) {
 				var req = TileRequest.parse(req.url);
 				server.serve(req, {}, function(status) {
+					if (status !== 200) throw new Error('Received ' + status + ' for ' + req.url);
 					callback();
 				});
 			}, function() {
@@ -102,7 +103,6 @@ describe('profiling', function() {
 							res.on('end', function() {
 								assert.equal(res.statusCode, 200);
 								assert.equal(res.headers['content-type'], 'text/html; charset=utf-8');
-								// TODO: check w/tolerance
 								console.log('\nVERIFY HTML VISUALLY:');
 								console.log('./test/profile.html');
 								fs.writeFileSync(__dirname + '/profile.html', body);
