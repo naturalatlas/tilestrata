@@ -1,6 +1,6 @@
 {
   "name": "tilestrata",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "A pluggable map tile server.",
   "license": "Apache License 2.0",
   "main": "index.js",
