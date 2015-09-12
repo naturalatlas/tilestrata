@@ -44,31 +44,31 @@ describe('TileRequestHandler', function() {
 			var handler = new TileRequestHandler();
 			var _plugin = {serve: function() {}};
 			handler.use(_plugin);
-			assert.equal(handler.provider, _plugin);
+			assert.equal(handler.provider.plugin, _plugin);
 		});
 		it('should recognize caches', function() {
 			var handler = new TileRequestHandler();
 			var _plugin = {get: function() {}, set: function() {}};
 			handler.use(_plugin);
-			assert.equal(handler.caches[0], _plugin);
+			assert.equal(handler.caches[0].plugin, _plugin);
 		});
 		it('should recognize transforms', function() {
 			var handler = new TileRequestHandler();
 			var _plugin = {transform: function() {}};
 			handler.use(_plugin);
-			assert.equal(handler.transforms[0], _plugin);
+			assert.equal(handler.transforms[0].plugin, _plugin);
 		});
 		it('should recognize request hooks', function() {
 			var handler = new TileRequestHandler();
 			var _plugin = {reqhook: function() {}};
 			handler.use(_plugin);
-			assert.equal(handler.requestHooks[0], _plugin);
+			assert.equal(handler.requestHooks[0].plugin, _plugin);
 		});
 		it('should recognize response hooks', function() {
 			var handler = new TileRequestHandler();
 			var _plugin = {reshook: function() {}};
 			handler.use(_plugin);
-			assert.equal(handler.responseHooks[0], _plugin);
+			assert.equal(handler.responseHooks[0].plugin, _plugin);
 		});
 		it('should accept arrays', function() {
 			var handler = new TileRequestHandler();
@@ -84,11 +84,11 @@ describe('TileRequestHandler', function() {
 				_reqhook,
 				_reshook
 			]);
-			assert.equal(handler.provider, _provider);
-			assert.equal(handler.caches[0], _cache);
-			assert.equal(handler.transforms[0], _transform);
-			assert.equal(handler.requestHooks[0], _reqhook);
-			assert.equal(handler.responseHooks[0], _reshook);
+			assert.equal(handler.provider.plugin, _provider);
+			assert.equal(handler.caches[0].plugin, _cache);
+			assert.equal(handler.transforms[0].plugin, _transform);
+			assert.equal(handler.requestHooks[0].plugin, _reqhook);
+			assert.equal(handler.responseHooks[0].plugin, _reshook);
 		});
 		it('should throw if unable to recognize plugin', function() {
 			var handler = new TileRequestHandler();
@@ -119,7 +119,7 @@ describe('TileRequestHandler', function() {
 			var handler = new TileRequestHandler();
 			var _provider = {serve: function() {}};
 			handler._registerProvider(_provider);
-			assert.equal(handler.provider, _provider);
+			assert.deepEqual(handler.provider, {id: 'provider#0', plugin: _provider});
 		});
 	});
 	describe('_registerTransform()', function() {
@@ -139,7 +139,10 @@ describe('TileRequestHandler', function() {
 			var _transform2 = {transform: function() {}};
 			handler._registerTransform(_transform1);
 			handler._registerTransform(_transform2);
-			assert.deepEqual(handler.transforms, [_transform1, _transform2]);
+			assert.deepEqual(handler.transforms, [
+				{id: 'transform#0', plugin: _transform1},
+				{id: 'transform#1', plugin: _transform2}
+			]);
 		});
 	});
 	describe('_registerCache()', function() {
@@ -163,7 +166,10 @@ describe('TileRequestHandler', function() {
 			var _cache2 = {get: function() {}, set: function() {}};
 			handler._registerCache(_cache1);
 			handler._registerCache(_cache2);
-			assert.deepEqual(handler.caches, [_cache1, _cache2]);
+			assert.deepEqual(handler.caches, [
+				{id: 'cache#0', plugin: _cache1},
+				{id: 'cache#1', plugin: _cache2}
+			]);
 		});
 	});
 	describe('_registerRequestHook()', function() {
@@ -187,7 +193,10 @@ describe('TileRequestHandler', function() {
 			var _hook2 = {reqhook: function() {}};
 			handler._registerRequestHook(_hook1);
 			handler._registerRequestHook(_hook2);
-			assert.deepEqual(handler.requestHooks, [_hook1, _hook2]);
+			assert.deepEqual(handler.requestHooks, [
+				{id: 'reqhook#0', plugin: _hook1},
+				{id: 'reqhook#1', plugin: _hook2}
+			]);
 		});
 	});
 	describe('_registerResponseHook()', function() {
@@ -211,7 +220,10 @@ describe('TileRequestHandler', function() {
 			var _hook2 = {reshook: function() {}};
 			handler._registerResponseHook(_hook1);
 			handler._registerResponseHook(_hook2);
-			assert.deepEqual(handler.responseHooks, [_hook1, _hook2]);
+			assert.deepEqual(handler.responseHooks, [
+				{id: 'reshook#0', plugin: _hook1},
+				{id: 'reshook#1', plugin: _hook2}
+			]);
 		});
 	});
 	describe('_initialize()', function() {

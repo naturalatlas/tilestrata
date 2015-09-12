@@ -117,7 +117,7 @@ In advanced use cases, it might be necessary for tiles to not be returned by the
 X-TileStrata-CacheWait:1
 ```
 
-## Health Checks
+### Health Checks
 
 TileStrata includes a `/health` endpoint that will return a `200 OK` if it can accept connections. The response will always be JSON. By setting `strata.healthy` to a function that accepts a callback you can take it a step further and control the status and data that it returns.
 
@@ -131,6 +131,10 @@ strata.healthy = function(callback) {
     callback(null, {loadavg: 1});
 };
 ```
+
+### Profiling / Debugging Performance
+
+Unless the `TILESTRATA_NOPROFILE` environment variable is set, TileStrata keeps track of basic latency and size information (min, max, avg) for all steps in the tile serving process. Data is kept for every plugin of every route of every layer and is broken down by zoom level. To access it, visit: `/profile` in your browser. If this information needs to be kept private, you can set the `TILESTRATA_PASSWORD` environment variable to a password that tilestrata will check (username is ignored).
 
 ## API Reference
 

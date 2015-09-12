@@ -24,8 +24,10 @@
   "homepage": "https://github.com/naturalatlas/tilestrata",
   "dependencies": {
     "async": "1.4.2",
+    "basic-auth": "^1.0.3",
     "bbox-intersect": "0.1.1",
     "etag": "1.7.0",
+    "filesize": "^3.1.3",
     "lodash": "3.10.1",
     "lru-cache": "2.6.5",
     "tilebelt": "1.0.1"

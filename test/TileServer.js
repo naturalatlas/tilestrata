@@ -670,7 +670,7 @@ describe('TileServer', function() {
 			}});
 
 			server.listen(8889, function(err) {
-				assert.isFalse(!!err, 'Unexpected error: ' + (err ? (err.message || err) : ''));
+				if (err) throw err;
 				http.get('http://localhost:8889/mylayer/3/2/1/tile.txt', function(res) {
 					var body = '';
 					res.on('data', function(data) { body += data; });
