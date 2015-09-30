@@ -276,7 +276,7 @@ module.exports = function(options) {
 
 ### Multi-Function Plugins
 
-Sometimes a plugin must consist of multiple parts. For instance, a plugin tracking response times must register a request hook and response hook. To accomodate this, TileStrata supports arrays:
+Sometimes a plugin must consist of multiple parts. For instance, a plugin tracking response times must register a request hook and response hook. To accommodate this, TileStrata supports arrays:
 ```js
 module.exports = function() {
     return [
