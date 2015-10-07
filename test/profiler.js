@@ -7,7 +7,7 @@ var TileRequest = require('../lib/TileRequest.js');
 
 describe('profiling', function() {
 	it('should operate normally', function(done) {
-		this.timeout(2000);
+		this.timeout(5000);
 		var server = new TileServer();
 		var i = 0;
 
@@ -25,8 +25,8 @@ describe('profiling', function() {
 				url: '/mylayer/3/2/1/tile.txt',
 				reqhook   : [30, []],
 				cacheget  : [30, [new Error('err')]],
-				provider  : [30, [null, new Buffer(500), {}]],
-				transform : [30, [null, new Buffer(300), {}]],
+				provider  : [550, [null, new Buffer(500), {}]],
+				transform : [1100, [null, new Buffer(300), {}]],
 				cacheset  : [30, []],
 				reshook   : [30, []]
 			},
