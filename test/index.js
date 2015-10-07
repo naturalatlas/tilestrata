@@ -58,7 +58,16 @@ describe('require("tilestrata")', function() {
 			};
 
 			middleware(httpReq, httpRes, next);
-		};
+		}
+
+		it('should return 200 for /health', function(done) {
+			var server = new TileServer();
+			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
+			var expected_headers = {'Content-Type': 'application/json', 'Content-Length': 47};
+			var expected_body = JSON.stringify({ok: true, version: version, host: '(hidden)'});
+			process.env.TILESTRATA_HIDEHOSTNAME = '1';
+			testMiddleware(middleware, '/tiles/health', false, {status: 200, headers: expected_headers, buffer: new Buffer(expected_body, 'utf8')}, done);
+		});
 
 		it('should return 200 when tile matches', function(done) {
 			var reqhook_called = false;
@@ -79,7 +88,7 @@ describe('require("tilestrata")', function() {
 						reqhook_called = true;
 						assert.equal(_server, server);
 						assert.instanceOf(_tile, TileRequest);
-						assert.equal(_req.url, '/tiles/basemap/3/2/1/file.txt');
+						assert.equal(_req.url, '/basemap/3/2/1/file.txt');
 						assert.isFunction(_res.writeHead);
 						callback();
 					}
@@ -95,7 +104,7 @@ describe('require("tilestrata")', function() {
 						});
 						assert.instanceOf(_result.buffer, Buffer);
 						assert.instanceOf(_tile, TileRequest);
-						assert.equal(_req.url, '/tiles/basemap/3/2/1/file.txt');
+						assert.equal(_req.url, '/basemap/3/2/1/file.txt');
 						assert.isFunction(_res.writeHead);
 						callback();
 					}

@@ -47,6 +47,92 @@ describe('TileServer', function() {
 		});
 	});
 	describe('serve()', function() {
+		it('should invoke request, response hooks', function(done) {
+			var reqhook1_called = 0;
+			var reqhook2_called = 0;
+			var reshook1_called = 0;
+			var reshook2_called = 0;
+			var mockRes = {};
+			var mockReq = {method: 'GET', url: '/layer/1/2/3/tile.png', headers: {}};
+			var tile = TileRequest.parse(mockReq.url);
+
+			var server = new TileServer();
+			var layer = server.layer('layer');
+
+			layer.route('tile.png')
+				.use({
+					serve: function(_server, _req, callback) {
+						assert.equal(_server, server);
+						assert.instanceOf(_req, TileRequest);
+						assert.equal(_req.filename, 'tile.png');
+						callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+					}
+				})
+				.use({reqhook: function(_server, _tile, _req, _res, callback) {
+					reqhook1_called++;
+					assert.equal(_server, server);
+					assert.instanceOf(_tile, TileRequest);
+					assert.equal(_req, mockReq);
+					assert.equal(_res, mockRes);
+					callback();
+				}})
+				.use({reqhook: function(_server, _tile, _req, _res, callback) {
+					reqhook2_called++;
+					assert.equal(_server, server);
+					assert.instanceOf(_tile, TileRequest);
+					assert.equal(_req, mockReq);
+					assert.equal(_res, mockRes);
+					callback();
+				}})
+				.use({reshook: function(_server, _tile, _req, _res, _result, callback) {
+					reshook1_called++;
+					assert.equal(_server, server);
+					assert.instanceOf(_tile, TileRequest);
+					assert.equal(_req, mockReq);
+					assert.equal(_res, mockRes);
+					_result.headers['X-Res-Hook-1'] = '1';
+					callback();
+				}})
+				.use({reshook: function(_server, _tile, _req, _res, _result, callback) {
+					reshook2_called++;
+					assert.equal(_server, server);
+					assert.instanceOf(_tile, TileRequest);
+					assert.equal(_req, mockReq);
+					assert.equal(_res, mockRes);
+					assert.instanceOf(_result.buffer, Buffer);
+					assert.deepEqual(_result.headers, {
+						'X-Powered-By': HEADER_XPOWEREDBY,
+						'X-Test': 'hello',
+						'X-Res-Hook-1': '1',
+						'Cache-Control': HEADER_CACHECONTROL
+					});
+					_result.headers['X-Res-Hook-2'] = '1';
+					_result.buffer = new Buffer(_result.buffer.toString('utf8') + '-modified');
+					callback();
+				}});
+
+			var http = {req: mockReq, res: mockRes};
+			server.serve(tile, http, function(status, buffer, headers) {
+				assert.equal(reqhook1_called, 1, 'Request hook 1 called');
+				assert.equal(reqhook2_called, 1, 'Request hook 2 called');
+				assert.equal(reshook1_called, 1, 'Response hook 1 called');
+				assert.equal(reshook2_called, 1, 'Response hook 2 called');
+
+				assert.equal(status, 200, '200 OK');
+				assert.equal(buffer.toString('utf8'), 'response-modified');
+				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
+					'X-Test': 'hello',
+					'X-Res-Hook-1': '1',
+					'X-Res-Hook-2': '1',
+					'Content-Length': 17,
+					'Cache-Control': HEADER_CACHECONTROL,
+					'ETag': '"11-miLcq2wD06H4X7CEVf44aA"'
+				});
+
+				done();
+			});
+		});
 		it('should return a 404 status if route not parseable', function(done) {
 			var server = new TileServer();
 			var req = TileRequest.parse('/index.html', {}, 'GET');
@@ -354,104 +440,6 @@ describe('TileServer', function() {
 				});
 				done();
 			});
-		});
-	});
-	describe('respond()', function() {
-		it('should invoke request, response hooks', function(done) {
-			var reqhook1_called = 0;
-			var reqhook2_called = 0;
-			var reshook1_called = 0;
-			var reshook2_called = 0;
-
-			var headWritten = 0;
-			var bodyWritten = 0;
-
-			var mockReq = {method: 'GET', url: '/layer/1/2/3/tile.png', headers: {}};
-			var mockRes = {
-				writeHead: function(status, headers) {
-					headWritten++;
-					assert.equal(status, 200);
-					assert.deepEqual(headers, {
-						'X-Powered-By': HEADER_XPOWEREDBY,
-						'X-Test': 'hello',
-						'X-Res-Hook-1': '1',
-						'X-Res-Hook-2': '1',
-						'Content-Length': 17,
-						'Cache-Control': HEADER_CACHECONTROL,
-						'ETag': '"11-miLcq2wD06H4X7CEVf44aA"'
-					});
-				},
-				write: function(buffer) {
-					bodyWritten++;
-					assert.equal(buffer.toString('utf8'), 'response-modified');
-				},
-				end: function() {
-					assert.equal(reqhook1_called, 1, 'Request hook 1 called');
-					assert.equal(reqhook2_called, 1, 'Request hook 2 called');
-					assert.equal(reshook1_called, 1, 'Response hook 1 called');
-					assert.equal(reshook2_called, 1, 'Response hook 2 called');
-					assert.equal(headWritten, 1, 'Head written');
-					assert.equal(bodyWritten, 1, 'Body written');
-					done();
-				}
-			};
-
-			var server = new TileServer();
-			var layer = server.layer('layer');
-
-			layer.route('tile.png')
-				.use({
-					serve: function(_server, _req, callback) {
-						assert.equal(_server, server);
-						assert.instanceOf(_req, TileRequest);
-						assert.equal(_req.filename, 'tile.png');
-						callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
-					}
-				})
-				.use({reqhook: function(_server, _tile, _req, _res, callback) {
-					reqhook1_called++;
-					assert.equal(_server, server);
-					assert.instanceOf(_tile, TileRequest);
-					assert.equal(_req, mockReq);
-					assert.equal(_res, mockRes);
-					callback();
-				}})
-				.use({reqhook: function(_server, _tile, _req, _res, callback) {
-					reqhook2_called++;
-					assert.equal(_server, server);
-					assert.instanceOf(_tile, TileRequest);
-					assert.equal(_req, mockReq);
-					assert.equal(_res, mockRes);
-					callback();
-				}})
-				.use({reshook: function(_server, _tile, _req, _res, _result, callback) {
-					reshook1_called++;
-					assert.equal(_server, server);
-					assert.instanceOf(_tile, TileRequest);
-					assert.equal(_req, mockReq);
-					assert.equal(_res, mockRes);
-					_result.headers['X-Res-Hook-1'] = '1';
-					callback();
-				}})
-				.use({reshook: function(_server, _tile, _req, _res, _result, callback) {
-					reshook2_called++;
-					assert.equal(_server, server);
-					assert.instanceOf(_tile, TileRequest);
-					assert.equal(_req, mockReq);
-					assert.equal(_res, mockRes);
-					assert.instanceOf(_result.buffer, Buffer);
-					assert.deepEqual(_result.headers, {
-						'X-Powered-By': HEADER_XPOWEREDBY,
-						'X-Test': 'hello',
-						'X-Res-Hook-1': '1',
-						'Cache-Control': HEADER_CACHECONTROL
-					});
-					_result.headers['X-Res-Hook-2'] = '1';
-					_result.buffer = new Buffer(_result.buffer.toString('utf8') + '-modified');
-					callback();
-				}});
-
-			server.respond(mockReq, mockRes);
 		});
 	});
 	describe('getTile()', function() {

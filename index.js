@@ -26,19 +26,15 @@ module.exports.middleware = function(options) {
 	});
 
 	function handleRequest(req, res, next) {
-		var url = req.url;
-		if (url.substring(0, prefix_len) === prefix) {
-			url = url.substring(prefix_len);
+		var original_url = req.url;
+		if (original_url.substring(0, prefix_len) === prefix) {
+			req.url = original_url.substring(prefix_len);
 		} else {
 			return next();
 		}
-
-		var tilereq = TileRequest.parse(url, req.headers, req.method);
-		server.serve(tilereq, {req: req, res: res}, function(status, buffer, headers) {
-			if (status === 404) return next();
-			res.writeHead(status, headers);
-			res.write(buffer);
-			res.end();
+		server._handleRequest(req, res, function() {
+			req.url = original_url;
+			next();
 		});
 	}
 
