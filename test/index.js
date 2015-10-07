@@ -77,8 +77,7 @@ describe('require("tilestrata")', function() {
 				'X-Test':'1',
 				'X-Powered-By': 'TileStrata/' + version,
 				'Content-Length': 4,
-				'Cache-Control': 'max-age=60',
-				'ETag': '"4-ExgdjMAeOQv2TJ5LDXp58w"'
+				'Cache-Control': 'max-age=60'
 			};
 
 			var server = new TileServer();
@@ -127,8 +126,7 @@ describe('require("tilestrata")', function() {
 			var expected_headers = {
 				'X-Powered-By': 'TileStrata/' + version,
 				'Content-Length': 4,
-				'Cache-Control': 'max-age=60',
-				'ETag': '"4-sya1BisvDmkEaBBxdTTLCQ"'
+				'Cache-Control': 'max-age=60'
 			};
 
 			var initCalled = false;

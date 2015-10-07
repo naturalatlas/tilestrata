@@ -126,8 +126,7 @@ describe('TileServer', function() {
 					'X-Res-Hook-1': '1',
 					'X-Res-Hook-2': '1',
 					'Content-Length': 17,
-					'Cache-Control': HEADER_CACHECONTROL,
-					'ETag': '"11-miLcq2wD06H4X7CEVf44aA"'
+					'Cache-Control': HEADER_CACHECONTROL
 				});
 
 				done();
@@ -314,8 +313,7 @@ describe('TileServer', function() {
 					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
 					'Content-Length': 8,
-					'Cache-Control': HEADER_CACHECONTROL,
-					'ETag': '"8-0fyOrzaTe+DDuoz+Ciwb/g"'
+					'Cache-Control': HEADER_CACHECONTROL
 				});
 				done();
 			});
@@ -366,56 +364,6 @@ describe('TileServer', function() {
 				done();
 			});
 		});
-		it('should return a 200 status if If-None-Match does not match ETag', function(done) {
-			var server = new TileServer();
-			server.layer('layer').route('tile.png').use({
-				serve: function(_server, _req, callback) {
-					assert.equal(_server, server);
-					assert.instanceOf(_req, TileRequest);
-					assert.equal(_req.filename, 'tile.png');
-					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
-				}
-			});
-
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {'if-none-match': '"1fbOrzaTe+DDuoz+Ciwb/g=="'}, 'GET');
-			server.serve(req, false, function(status, buffer, headers) {
-				assert.equal(status, 200);
-				assert.equal(buffer.toString('utf8'), 'response');
-				assert.deepEqual(headers, {
-					'X-Powered-By': HEADER_XPOWEREDBY,
-					'X-Test': 'hello',
-					'Cache-Control': HEADER_CACHECONTROL,
-					'ETag': '"8-0fyOrzaTe+DDuoz+Ciwb/g"',
-					'Content-Length': 8
-				});
-				done();
-			});
-		});
-		it('should return a 304 status if If-None-Match matches ETag', function(done) {
-			var server = new TileServer();
-			server.layer('layer').route('tile.png').use({
-				serve: function(_server, _req, callback) {
-					assert.equal(_server, server);
-					assert.instanceOf(_req, TileRequest);
-					assert.equal(_req.filename, 'tile.png');
-					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
-				}
-			});
-
-			var req = TileRequest.parse('/layer/1/2/3/tile.png', {'if-none-match': '"8-0fyOrzaTe+DDuoz+Ciwb/g"'}, 'GET');
-			server.serve(req, false, function(status, buffer, headers) {
-				assert.equal(status, 304);
-				assert.equal(buffer.toString('utf8'), '');
-				assert.deepEqual(headers, {
-					'X-Powered-By': HEADER_XPOWEREDBY,
-					'X-Test': 'hello',
-					'ETag': '"8-0fyOrzaTe+DDuoz+Ciwb/g"',
-					'Cache-Control': HEADER_CACHECONTROL,
-					'Content-Length': 8
-				});
-				done();
-			});
-		});
 		it('should omit body if a HEAD request', function(done) {
 			var server = new TileServer();
 			server.layer('layer').route('tile.png').use({
@@ -435,8 +383,7 @@ describe('TileServer', function() {
 					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
 					'Content-Length': 8,
-					'Cache-Control': HEADER_CACHECONTROL,
-					'ETag': '"8-0fyOrzaTe+DDuoz+Ciwb/g"'
+					'Cache-Control': HEADER_CACHECONTROL
 				});
 				done();
 			});
@@ -487,8 +434,7 @@ describe('TileServer', function() {
 					'X-Powered-By': HEADER_XPOWEREDBY,
 					'X-Test': 'hello',
 					'Content-Length': 6,
-					'Cache-Control': HEADER_CACHECONTROL,
-					'ETag': '"6-tKiEF7PQFw11TGR8MLchag"'
+					'Cache-Control': HEADER_CACHECONTROL
 				});
 				done();
 			});
