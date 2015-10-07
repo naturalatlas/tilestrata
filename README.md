@@ -1,6 +1,6 @@
 # TileStrata
 [![NPM version](http://img.shields.io/npm/v/tilestrata.svg?style=flat)](https://www.npmjs.org/package/tilestrata)
-[![Build Status](http://img.shields.io/travis/naturalatlas/tilestrata/master.svg?style=flat)](https://travis-ci.org/naturalatlas/tilestrata)
+[![Build Status](https://travis-ci.org/naturalatlas/tilestrata.svg)](https://travis-ci.org/naturalatlas/tilestrata)
 [![Coverage Status](http://img.shields.io/codecov/c/github/naturalatlas/tilestrata/master.svg?style=flat)](https://codecov.io/github/naturalatlas/tilestrata)
 
 TileStrata is a pluggable "slippy map" tile server that emphasizes code-as-configuration. It's clean, highly tested, and performant. After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js. The primary goal is painless extendability.
@@ -19,7 +19,7 @@ TileStrata consists of five main actors, usually implemented as plugins:
 - [*"request hook"*](#writing-request-hooks) – Called at the very beginning of a tile request.
 - [*"response hook"*](#writing-response-hooks) – Called right before a tile is served to the client.
 
-<img src="https://cdn.rawgit.com/naturalatlas/tilestrata/master/graphics/reqflow.svg" width="760" />
+<img src="https://cdn.rawgit.com/naturalatlas/tilestrata/master/misc/graphics/reqflow.svg" width="760" />
 
 #### List of Plugins
 
