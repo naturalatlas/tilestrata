@@ -141,3 +141,12 @@ table {
 table:last-child {
 	margin-bottom: 0;
 }
+.hostinfo {
+	text-transform: none;
+	font-weight: normal;
+}
+.hostinfo strong {
+	text-transform: uppercase;
+	font-weight: normal;
+	font-style: italic;
+}
