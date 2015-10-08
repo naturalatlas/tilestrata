@@ -1,9 +1,19 @@
-var TileLayer = module.exports.TileLayer = require('./lib/TileLayer.js');
-var TileRequest = module.exports.TileRequest = require('./lib/TileRequest.js');
-var TileRequestHandler = module.exports.TileRequestHandler = require('./lib/TileRequestHandler.js');
-var TileServer = module.exports.TileServer = require('./lib/TileServer.js');
+var TileLayer = require('./lib/TileLayer.js');
+var TileRequest = require('./lib/TileRequest.js');
+var TileRequestHandler = require('./lib/TileRequestHandler.js');
+var TileServer = require('./lib/TileServer.js');
+
+module.exports = function(options) {
+	return new TileServer(options);
+};
+
+module.exports.TileServer = TileServer;
+module.exports.TileRequest = TileRequest;
+module.exports.TileRequestHandler = TileRequestHandler;
+module.exports.TileLayer = TileLayer;
 
 module.exports.createServer = function() {
+	console.warn('tilestrata.createServer() is deprecated, use tilestrata() instead');
 	return new TileServer();
 };
 

@@ -15,6 +15,15 @@ var noop_provider = {
 };
 
 describe('TileServer', function() {
+	it('should set "options" property', function() {
+		var opts = {};
+		var server = new TileServer(opts);
+		assert.equal(server.options, opts);
+	});
+	it('should set "options" property by default', function() {
+		var server = new TileServer();
+		assert.deepEqual(server.options, {});
+	});
 	it('should have "version" property', function() {
 		var server = new TileServer();
 		var pkg = require('../package.json');
@@ -644,79 +653,91 @@ describe('TileServer', function() {
 			});
 		});
 		describe('/health', function() {
-			var server;
 			var pkg = require('../package.json');
-			before(function(done) {
-				server = new TileServer();
-				server.listen(8888, done);
-			});
 			it('should return a 200 OK normally', function(done) {
-				http.get('http://localhost:8888/health', function(res) {
-					var body = '';
-					res.on('data', function(data) { body += data; });
-					res.on('end', function() {
-						assert.equal(res.statusCode, 200);
-						var expected = '{"ok":true,"version":"'+pkg.version+'","host":'+JSON.stringify(os.hostname())+'}';
-						assert.equal(body, expected);
-						assert.equal(res.headers['content-type'], 'application/json');
-						assert.equal(res.headers['content-length'], expected.length);
-						done();
+				var server = new TileServer();
+				var httpserver = server.listen(8888, function(err) {
+					if (err) throw err;
+					http.get('http://localhost:8888/health', function(res) {
+						var body = '';
+						res.on('data', function(data) { body += data; });
+						res.on('end', function() {
+							assert.equal(res.statusCode, 200);
+							var expected = '{"ok":true,"version":"'+pkg.version+'","host":'+JSON.stringify(os.hostname())+'}';
+							assert.equal(body, expected);
+							assert.equal(res.headers['content-type'], 'application/json');
+							assert.equal(res.headers['content-length'], expected.length);
+							httpserver.close(done);
+						});
 					});
 				});
 			});
 			it('should include data from strata.healthy if set', function(done) {
-				server.healthy = function(callback) {
-					return callback(null, {'host': '(overridden)', 'commit': 000000, 'message': '"Hello"'});
-				};
-				http.get('http://localhost:8888/health', function(res) {
-					var body = '';
-					res.on('data', function(data) { body += data; });
-					res.on('end', function() {
-						var parsedBody = JSON.parse(body);
-						assert.equal(res.statusCode, 200);
-						assert.deepEqual(parsedBody, {
-							ok: true,
-							version: pkg.version,
-							host: '(overridden)',
-							commit: 000000,
-							message: '"Hello"'
+				var server = new TileServer({
+					healthy: function(callback) {
+						return callback(null, {'host': '(overridden)', 'commit': 000000, 'message': '"Hello"'});
+					}
+				});
+				var httpserver = server.listen(8888, function(err) {
+					if (err) throw err;
+					http.get('http://localhost:8888/health', function(res) {
+						var body = '';
+						res.on('data', function(data) { body += data; });
+						res.on('end', function() {
+							var parsedBody = JSON.parse(body);
+							assert.equal(res.statusCode, 200);
+							assert.deepEqual(parsedBody, {
+								ok: true,
+								version: pkg.version,
+								host: '(overridden)',
+								commit: 000000,
+								message: '"Hello"'
+							});
+							httpserver.close(done);
 						});
-						done();
 					});
 				});
 			});
 			it('should return 500 if strata.healthy returns an error', function(done) {
 				var now = Date.now();
-				server.healthy = function(callback) {
-					callback(new Error('CPU usage too high'))
-				};
-				http.get('http://localhost:8888/health', function(res) {
-					var body = '';
-					res.on('data', function(data) { body += data; });
-					res.on('end', function() {
-						var parsedBody = JSON.parse(body);
-						assert.equal(res.statusCode, 500);
-						assert.deepEqual(parsedBody, {
-							ok: false,
-							version: pkg.version,
-							host: os.hostname(),
-							message: 'CPU usage too high'
+				var server = new TileServer({
+					healthy: function(callback) {
+						callback(new Error('CPU usage too high'))
+					}
+				});
+				var httpserver = server.listen(8888, function(err) {
+					if (err) throw err;
+					http.get('http://localhost:8888/health', function(res) {
+						var body = '';
+						res.on('data', function(data) { body += data; });
+						res.on('end', function() {
+							var parsedBody = JSON.parse(body);
+							assert.equal(res.statusCode, 500);
+							assert.deepEqual(parsedBody, {
+								ok: false,
+								version: pkg.version,
+								host: os.hostname(),
+								message: 'CPU usage too high'
+							});
+							httpserver.close(done);
 						});
-						done();
 					});
 				});
 			});
 			it('should not expose hostname if TILESTRATA_HIDEHOSTNAME=1', function(done) {
-				server.healthy = null;
 				process.env.TILESTRATA_HIDEHOSTNAME = '1';
-				http.get('http://localhost:8888/health', function(res) {
-					var body = '';
-					res.on('data', function(data) { body += data; });
-					res.on('end', function() {
-						assert.equal(res.statusCode, 200);
-						var expected = '{"ok":true,"version":"'+pkg.version+'","host":"(hidden)"}';
-						assert.equal(body, expected);
-						done();
+				var server = new TileServer();
+				var httpserver = server.listen(8888, function(err) {
+					if (err) throw err;
+					http.get('http://localhost:8888/health', function(res) {
+						var body = '';
+						res.on('data', function(data) { body += data; });
+						res.on('end', function() {
+							assert.equal(res.statusCode, 200);
+							var expected = '{"ok":true,"version":"'+pkg.version+'","host":"(hidden)"}';
+							assert.equal(body, expected);
+							httpserver.close(done);
+						});
 					});
 				});
 			});

@@ -19,10 +19,11 @@ describe('require("tilestrata")', function() {
 	it('should have "TileLayer" property', function() {
 		assert.equal(tilestrata.TileLayer, TileLayer);
 	});
-	describe('createServer()', function() {
-		it('should return TileServer instance', function() {
-			assert.instanceOf(tilestrata.createServer(), TileServer);
-		});
+	it('should be a function that returns a TileServer instance w/options', function() {
+		var opts = {};
+		var result = tilestrata(opts);
+		assert.instanceOf(result, TileServer);
+		assert.equal(result.options, opts);
 	});
 	describe('middleware()', function() {
 		function testMiddleware(middleware, requrl, expect_next, expected_details, callback) {

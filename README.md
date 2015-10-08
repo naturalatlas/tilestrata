@@ -47,7 +47,7 @@ var disk = require('tilestrata-disk');
 var sharp = require('tilestrata-sharp');
 var mapnik = require('tilestrata-mapnik');
 var dependency = require('tilestrata-dependency');
-var strata = tilestrata.createServer();
+var strata = tilestrata();
 
 // define layers
 strata.layer('basemap')
@@ -81,7 +81,7 @@ TileStrata comes with middleware for Express that makes serving tiles from an ex
 
 ```js
 var tilestrata = require('tilestrata');
-var strata = tilestrata.createServer();
+var strata = tilestrata();
 strata.layer('basemap') /* ... */
 strata.layer('contours') /* ... */
 
@@ -119,17 +119,22 @@ X-TileStrata-CacheWait:1
 
 ### Health Checks
 
-TileStrata includes a `/health` endpoint that will return a `200 OK` if it can accept connections. The response will always be JSON. By setting `strata.healthy` to a function that accepts a callback you can take it a step further and control the status and data that it returns.
+TileStrata includes a `/health` endpoint that will return a `200 OK` if it can accept connections. The response will always be JSON. By setting the `"healthy"` option to a function that accepts a callback you can take it a step further and control the status and data that it returns.
 
 ```js
 // not healthy
-strata.healthy = function(callback) {
-    callback(new Error('CPU is too high'), {loadavg: 3});
-};
+var strata = tilestrata({
+	healthy: function(callback) {
+	    callback(new Error('CPU is too high'), {loadavg: 3});
+	}
+});
+
 // healthy
-strata.healthy = function(callback) {
-    callback(null, {loadavg: 1});
-};
+var strata = tilestrata({
+	healthy: function(callback) {
+	    callback(null, {loadavg: 1});
+	}
+});
 ```
 
 ### Profiling / Debugging Performance
