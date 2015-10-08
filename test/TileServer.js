@@ -603,7 +603,7 @@ describe('TileServer', function() {
 				})
 			}});
 
-			server.listen(8889, function(err) {
+			var result = server.listen(8889, function(err) {
 				if (err) throw err;
 				http.get('http://localhost:8889/mylayer/3/2/1/tile.txt', function(res) {
 					var body = '';
@@ -619,6 +619,8 @@ describe('TileServer', function() {
 					});
 				});
 			});
+
+			assert.instanceOf(result, http.Server);
 		});
 		describe('/robots.txt', function() {
 			it('should disallow indexing', function(done) {

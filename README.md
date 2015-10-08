@@ -143,7 +143,7 @@ Unless the `TILESTRATA_NOPROFILE` environment variable is set, TileStrata keeps 
 #### [TileServer](#tileserver)
 
 ##### server.listen(port, [hostname], [callback])
-Starts accepting requests on the specified port. The arguments to this method are exactly identical to node's http.Server [listen()](http://nodejs.org/api/http.html#http_server_listen_port_hostname_backlog_callback) method.
+Starts accepting requests on the specified port. The arguments to this method are exactly identical to node's http.Server [listen()](http://nodejs.org/api/http.html#http_server_listen_port_hostname_backlog_callback) method. It returns the [http.Server](https://nodejs.org/api/http.html#http_class_http_server) instance.
 
 ##### server.layer(name, [opts])
 Registers a new layer with the given name and returns its [TileLayer](#tilelayer) instance. If the layer already exists, the existing instance will be returned. Whatever name is used will be the first part of the url that can be used to fetch tiles: `/:layer/...`. The following options can be provided:
