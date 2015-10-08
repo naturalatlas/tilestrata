@@ -20,6 +20,11 @@ h1 {
 	margin: 0;
 	border: 1px solid #000;
 }
+h1 img {
+	vertical-align: middle;
+	margin: -3px 2px 0 0;
+	opacity: 0.3;
+}
 h2 {
 	font-size: 22px;
 	font-family: Helvetica, arial, sans-serif;
