@@ -29,6 +29,23 @@ describe('TileServer', function() {
 		var pkg = require('../package.json');
 		assert.equal(server.version, pkg.version);
 	});
+	describe('uptime()', function() {
+		it('should return null if the server hasn\'t started', function() {
+			var server = new TileServer();
+			assert.isNull(server.uptime());
+		});
+		it('should return object with duration and start', function(done) {
+			var server = new TileServer();
+			var httpserver = server.listen(8888, function(err) {
+				if (err) throw err;
+				var uptime = server.uptime();
+				assert.isObject(uptime);
+				assert.isNumber(uptime.start);
+				assert.isNumber(uptime.duration);
+				httpserver.close(done);
+			});
+		});
+	});
 	describe('layer()', function() {
 		it('should operate normally', function() {
 			var server = new TileServer();
@@ -663,10 +680,12 @@ describe('TileServer', function() {
 						res.on('data', function(data) { body += data; });
 						res.on('end', function() {
 							assert.equal(res.statusCode, 200);
-							var expected = '{"ok":true,"version":"'+pkg.version+'","host":'+JSON.stringify(os.hostname())+'}';
-							assert.equal(body, expected);
+							var expected = {ok: true, version: pkg.version, host: os.hostname()};
+							var parsedBody = JSON.parse(body);
+							assert.match(parsedBody.uptime, /^\d+(\.\d+)? seconds$/);
+							delete parsedBody.uptime;
+							assert.deepEqual(parsedBody, expected);
 							assert.equal(res.headers['content-type'], 'application/json');
-							assert.equal(res.headers['content-length'], expected.length);
 							httpserver.close(done);
 						});
 					});
@@ -685,6 +704,7 @@ describe('TileServer', function() {
 						res.on('data', function(data) { body += data; });
 						res.on('end', function() {
 							var parsedBody = JSON.parse(body);
+							delete parsedBody.uptime;
 							assert.equal(res.statusCode, 200);
 							assert.deepEqual(parsedBody, {
 								ok: true,
@@ -712,6 +732,7 @@ describe('TileServer', function() {
 						res.on('data', function(data) { body += data; });
 						res.on('end', function() {
 							var parsedBody = JSON.parse(body);
+							delete parsedBody.uptime;
 							assert.equal(res.statusCode, 500);
 							assert.deepEqual(parsedBody, {
 								ok: false,
@@ -734,8 +755,10 @@ describe('TileServer', function() {
 						res.on('data', function(data) { body += data; });
 						res.on('end', function() {
 							assert.equal(res.statusCode, 200);
-							var expected = '{"ok":true,"version":"'+pkg.version+'","host":"(hidden)"}';
-							assert.equal(body, expected);
+							var expected = {ok: true, version: pkg.version, host: '(hidden)'};
+							var parsedBody = JSON.parse(body);
+							delete parsedBody.uptime;
+							assert.deepEqual(parsedBody, expected);
 							httpserver.close(done);
 						});
 					});

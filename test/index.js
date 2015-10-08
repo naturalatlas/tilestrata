@@ -48,7 +48,11 @@ describe('require("tilestrata")', function() {
 					_write_called = true;
 					assert.isTrue(_writeHead_called);
 					assert.instanceOf(buffer, Buffer);
-					assert.equal(buffer.toString('utf8'), expected_details.buffer.toString('utf8'));
+					if (typeof expected_details.buffer === 'function') {
+						expected_details.buffer(buffer);
+					} else {
+						assert.equal(buffer.toString('utf8'), expected_details.buffer.toString('utf8'));
+					}
 				},
 				end: function() {
 					if (expect_next) throw new Error('Unexpected "end" call');
@@ -64,10 +68,14 @@ describe('require("tilestrata")', function() {
 		it('should return 200 for /health', function(done) {
 			var server = new TileServer();
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
-			var expected_headers = {'Content-Type': 'application/json', 'Content-Length': 47};
-			var expected_body = JSON.stringify({ok: true, version: version, host: '(hidden)'});
+			var expected_headers = {'Content-Type': 'application/json', 'Content-Length': 68};
+			var expected_body = JSON.stringify();
 			process.env.TILESTRATA_HIDEHOSTNAME = '1';
-			testMiddleware(middleware, '/tiles/health', false, {status: 200, headers: expected_headers, buffer: new Buffer(expected_body, 'utf8')}, done);
+			testMiddleware(middleware, '/tiles/health', false, {status: 200, headers: expected_headers, buffer: function(actual_buffer) {
+				var parsedBody = JSON.parse(actual_buffer);
+				delete parsedBody.uptime;
+				assert.deepEqual(parsedBody, {ok: true, version: version, host: '(hidden)'});
+			}}, done);
 		});
 
 		it('should return 200 when tile matches', function(done) {

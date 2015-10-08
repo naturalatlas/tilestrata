@@ -160,6 +160,9 @@ Registers a new layer with the given name and returns its [TileLayer](#tilelayer
 ##### server.getTile(layer, filename, x, y, z, callback)
 Attempts to retrieve a tile from the specified layer (string). The callback will be invoked with three arguments: `err`, `buffer`, and `headers`.
 
+##### server.uptime()
+Returns an object containing "duration" and "start" (both in milliseconds). If the server hasn't started, the result will be `null`.
+
 ##### server.version
 The version of TileStrata (useful to plugins, mainly).
 
