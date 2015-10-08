@@ -195,6 +195,7 @@ A request hook implementation needs one method: `reqhook`. Optionally it can inc
 ```js
 module.exports = function(options) {
     return {
+        name: 'myplugin',
         init: function(server, callback) {
             callback(err);
         },
@@ -212,6 +213,7 @@ A cache implementation needs two methods: `get`, `set`. Optionally a cache can d
 ```js
 module.exports = function(options) {
     return {
+        name: 'myplugin',
         init: function(server, callback) {
             callback(err);
         },
@@ -238,6 +240,7 @@ Providers are responsible for building tiles. A provider must define a `serve` m
 ```js
 module.exports = function(options) {
     return {
+        name: 'myplugin',
         init: function(server, callback) {
             callback(err);
         },
@@ -255,6 +258,7 @@ Transforms modify the result from a provider before it's served (and cached). A 
 ```js
 module.exports = function(options) {
     return {
+        name: 'myplugin',
         init: function(server, callback) {
             callback(err);
         },
@@ -272,6 +276,7 @@ A response hook implementation needs one method: `reshook`. Optionally it can in
 ```js
 module.exports = function(options) {
     return {
+        name: 'myplugin',
         init: function(server, callback) {
             callback(err);
         },
@@ -288,8 +293,8 @@ Sometimes a plugin must consist of multiple parts. For instance, a plugin tracki
 ```js
 module.exports = function() {
     return [
-        {reqhook: function(...) { /* ... */ }},
-        {reshook: function(...) { /* ... */ }}
+        {name: 'myplugin', reqhook: function(...) { /* ... */ }},
+        {name: 'myplugin', reshook: function(...) { /* ... */ }}
     ];
 };
 ```

@@ -150,3 +150,7 @@ table:last-child {
 	font-weight: normal;
 	font-style: italic;
 }
+.plugin-name {
+	font-style: italic;
+	opacity: 0.6;
+}

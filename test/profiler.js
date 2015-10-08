@@ -71,11 +71,12 @@ describe('profiling', function() {
 
 
 		var plugins = [
-			{reqhook: function(server, tile, callback) { _call('reqhook', tile, arguments); }},
-			{serve: function(server, tile, callback) { _call('provider', tile, arguments); }},
+			{name: 'plugin-a', reqhook: function(server, tile, callback) { _call('reqhook', tile, arguments); }},
+			{name: 'plugin-b', serve: function(server, tile, callback) { _call('provider', tile, arguments); }},
 			{transform: function(server, tile, buffer, headers, callback) { _call('transform', tile, arguments); }},
-			{reshook: function(server, tile, req, res, result, callback) { _call('reshook', tile, arguments); }},
+			{name: 'plugin-d', reshook: function(server, tile, req, res, result, callback) { _call('reshook', tile, arguments); }},
 			{
+				name: 'plugin-e',
 				get: function(server, tile, callback) { _call('cacheget', tile, arguments); },
 				set: function(server, tile, buffer, headers, callback) { _call('cacheset', tile, arguments); }
 			}

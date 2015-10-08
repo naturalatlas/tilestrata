@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var TileRequest = require('../lib/TileRequest.js');
 var TileRequestHandler = require('../lib/TileRequestHandler.js');
 var TileServer = require('../lib/TileServer.js');
@@ -40,8 +41,14 @@ describe('require("tilestrata")', function() {
 				writeHead: function(status, headers) {
 					if (expect_next) throw new Error('Unexpected "writeHead" call');
 					_writeHead_called = true;
+					var actual_headers = headers;
+					// don't test content-length when the buffer is variable
+					if (typeof expected_details.buffer === 'function') {
+						actual_headers = _.clone(actual_headers);
+						delete actual_headers['Content-Length'];
+					}
 					assert.equal(status, expected_details.status);
-					assert.deepEqual(headers, expected_details.headers);
+					assert.deepEqual(actual_headers, expected_details.headers);
 				},
 				write: function(buffer) {
 					if (expect_next) throw new Error('Unexpected "write" call');
@@ -68,7 +75,7 @@ describe('require("tilestrata")', function() {
 		it('should return 200 for /health', function(done) {
 			var server = new TileServer();
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
-			var expected_headers = {'Content-Type': 'application/json', 'Content-Length': 68};
+			var expected_headers = {'Content-Type': 'application/json'};
 			var expected_body = JSON.stringify();
 			process.env.TILESTRATA_HIDEHOSTNAME = '1';
 			testMiddleware(middleware, '/tiles/health', false, {status: 200, headers: expected_headers, buffer: function(actual_buffer) {
