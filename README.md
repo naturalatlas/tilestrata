@@ -101,13 +101,13 @@ app.use(tilestrata.middleware({
 As an added bonus, the balancer does not assume all servers in the pool have the same layers available. The balancer keeps track of the layers provided on each node so it knows where to route. In sum, it features:
 
 - **Fully elastic** w/minimal setup
-- **Consistent routing** (improves cache hits)
+- **Consistent routing** (improves local cache hits)
 - **Metatile-aware** (prevents redundant rendering)
 - **Layer-aware** (allows heterogenous distribution of layers in the cluster)
 
 [**TileStrata Balancer Readme →**](https://github.com/naturalatlas/tilestrata-balancer)
 
-*Note: One could use cookie-persistence with a traditional LB, but this forces users onto a single machine (not optimal).*
+*Note: One could use cookie-persistence with a traditional load balancers, but this forces users onto a single machine (not optimal).*
 
 ### Rebuilding the Tile Cache
 

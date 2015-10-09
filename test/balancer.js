@@ -124,7 +124,7 @@ describe('TileStrata Balancer integration', function() {
 						assert.equal(res.statusCode, 200);
 						var body = '';
 						res.on('data', function(data) { body += data; });
-						res.on('end', function() { setTimeout(callback, 10); });
+						res.on('end', function() { setTimeout(callback, check_interval); });
 					}).on('error', callback);
 				}, callback);
 			},
@@ -139,6 +139,64 @@ describe('TileStrata Balancer integration', function() {
 					assert.isTrue(reregistered, 'Should have re-registered by 4 x check_interval');
 					done();
 				}, check_interval*4);
+			}
+		], function(err) {
+			if (err) throw err;
+		});
+	});
+
+	it('should not recognize /health pings w/o proper X-TileStrataBalancer-Token header', function(done) {
+		var reconnects = 0;
+		var check_interval = 10;
+
+		async.series([
+			function setupBalancer(callback) {
+				balancer = http.createServer(function(req, res) {
+					reconnects++;
+					res.writeHead(201, {'Content-Type': 'application/json'})
+					res.end('{"check_interval": ' + check_interval + ', "token": "a"}');
+				});
+				balancer.listen(8891, callback);
+			},
+			function setupTileStrata(callback) {
+				strata = tilestrata({
+					balancer: {
+						register_mindelay: 10,
+						register_maxdelay: 10,
+						register_timeout: 100,
+						host: '127.0.0.1:8891'
+					}
+				});
+				strata.listen(8888, callback);
+			},
+			function waitForRegistration(callback) {
+				var interval = setInterval(function() {
+					if (reconnects > 0) {
+						clearInterval(interval);
+						return callback();
+					}
+				}, 10);
+			},
+			function issueInvalidHealthChecks(callback) {
+				async.timesSeries(5, function(i, callback) {
+					http.get({
+						hostname: '127.0.0.1',
+						port: 8888,
+						path: '/health',
+						headers: {'X-TileStrataBalancer-Token': 'b'}
+					}, function(res) {
+						assert.equal(res.statusCode, 200);
+						var body = '';
+						res.on('data', function(data) { body += data; });
+						res.on('end', function() { setTimeout(callback, check_interval); });
+					}).on('error', callback);
+				}, callback);
+			},
+			function checkReconnects(callback) {
+				setTimeout(function() {
+					assert.isAbove(reconnects, 2);
+					done();
+				}, check_interval * 4);
 			}
 		], function(err) {
 			if (err) throw err;
