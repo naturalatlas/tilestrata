@@ -635,13 +635,14 @@ describe('TileServer', function() {
 					var body = '';
 					res.on('data', function(data) { body += data; });
 					res.on('end', function() {
+						var expected_body = 'hello x: 2 y: 1 z: 3';
 						assert.equal(res.statusCode, 200);
-						assert.equal(body, 'hello x: 2 y: 1 z: 3');
+						assert.equal(body, expected_body);
 						assert.equal(res.headers['content-type'], 'text/plain');
-						assert.equal(res.headers['content-length'], 'hello x: 2 y: 1 z: 3'.length);
+						assert.equal(res.headers['content-length'], expected_body.length);
 						assert.equal(res.headers['x-header'], 'test');
 						assert.equal(res.headers['x-powered-by'], HEADER_XPOWEREDBY);
-						done();
+						server.close(done);
 					});
 				});
 			});
@@ -663,7 +664,7 @@ describe('TileServer', function() {
 							assert.equal(body, expected);
 							assert.equal(res.headers['content-type'], 'text/plain');
 							assert.equal(res.headers['content-length'], expected.length);
-							done();
+							server.close(done);
 						});
 					});
 				});

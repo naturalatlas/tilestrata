@@ -98,7 +98,7 @@ app.use(tilestrata.middleware({
 
 *[WIP]* TileStrata >= [2.0.0](https://github.com/naturalatlas/tilestrata/releases/tag/v2.0.0) supports integration with [TileStrata Balancer](https://github.com/naturalatlas/tilestrata-balancer), an elastic load balancer designed specifically for the nuances of tile serving – particularly [metatiles](http://wiki.openstreetmap.org/wiki/Meta_tiles). Generic load balancers have no knowledge of metatiles and thus will naively split tile requests out to multiple servers which leads to redundant rendering (slow and a waste of computing power).
 
-As an added bonus, the balancer does not assume all servers in the pool have the same layers available. The balancer keeps track of the layers provided on each node so it knows where to route. In sum, it features:
+As an added bonus, the balancer does not assume all servers in the pool have the same layers available. The balancer keeps track of the layers provided on each node so it knows where to route. In sum, the overview:
 
 - **Fully elastic** w/minimal setup
 - **Consistent routing** (improves local cache hits)
