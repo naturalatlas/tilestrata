@@ -26,29 +26,48 @@ describe('TileStrata Balancer integration', function() {
 					assert.equal(req.method, 'POST');
 					assert.equal(req.url, '/register');
 					assert.equal(req.headers['content-type'], 'application/json');
-					if (i <= 4) { // error for two requests
-						res.writeHead(500, {});
-						return res.end('err');
-					}
 
-					if (i >= 6) throw new Error('Called /register too many times');
-					res.writeHead(201, {'Content-Type': 'application/json'})
-					res.end('{"check_interval": 1000, "token": "a"}');
+					var body = '';
+					req.on('data', function (data) { body += data; });
+					req.on('end', function () {
+						assert.deepEqual(JSON.parse(body), {
+							listen_port: 8892,
+							node_weight: 5,
+							layers: [
+								{name: 'layera', routes: ['tile.a'], options: {minZoom: 1, maxZoom: 3, bbox: [-117.243,36.9924,-102.042,49.0014]}},
+								{name: 'layerb', routes: ['tile.b'], options: {}},
+							]
+						});
 
-					// finish up the test
-					setTimeout(done, 200);
+						if (i <= 4) { // error for two requests
+							res.writeHead(500, {});
+							return res.end('err');
+						}
+
+						if (i >= 6) throw new Error('Called /register too many times');
+						res.writeHead(201, {'Content-Type': 'application/json'})
+						res.end('{"check_interval": 1000, "token": "a"}');
+
+						// finish up the test
+						setTimeout(done, 200);
+					});
 				});
 				balancer.listen(8891, callback);
 			},
 			function setupTileStrata(callback) {
 				strata = tilestrata({
 					balancer: {
+						node_weight: 5,
 						register_mindelay: 10,
 						register_maxdelay: 10,
 						register_timeout: 100,
 						host: '127.0.0.1:8891'
 					}
 				});
+				strata.layer('layera', {minZoom: 1, maxZoom: 3, bbox: [-117.243,36.9924,-102.042,49.0014]})
+					.route('tile.a').use({serve: noop});
+				strata.layer('layerb', {})
+					.route('tile.b').use({serve: noop});
 				strata.listen(8892, callback);
 			}
 		], function(err) {
@@ -203,15 +222,3 @@ describe('TileStrata Balancer integration', function() {
 		});
 	});
 });
-
-// should not recognize non-tbalanc
-
-/*
-
-
-				strata.layer('layera', {minZoom: 1, maxZoom: 3, bbox: [-117.243,36.9924,-102.042,49.0014]})
-					.route('tile.a').use({serve: noop});
-				strata.layer('layerb', {})
-					.route('tile.b').use({serve: noop});
-
- */

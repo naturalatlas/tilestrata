@@ -5,7 +5,7 @@ var fs = require('fs');
 var TileServer = require('../lib/TileServer.js');
 var TileRequest = require('../lib/TileRequest.js');
 
-describe.skip('profiling', function() {
+describe('profiling', function() {
 	it('should operate normally', function(done) {
 		this.timeout(5000);
 		var server = new TileServer();

@@ -103,7 +103,7 @@ As an added bonus, the balancer does not assume all servers in the pool have the
 - **Fully elastic** w/minimal setup
 - **Consistent routing** (improves local cache hits)
 - **Metatile-aware** (prevents redundant rendering)
-- **Layer-aware** (allows heterogenous distribution of layers in the cluster)
+- **Layer-aware** (allows heterogeneous distribution of layers in the cluster)
 
 [**TileStrata Balancer Readme →**](https://github.com/naturalatlas/tilestrata-balancer)
 
