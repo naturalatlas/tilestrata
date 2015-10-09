@@ -62,6 +62,8 @@ tr td[rowspan] {
 }
 td.field {
 	border-left: #111;
+	text-align: right;
+	padding-right: 5px;
 }
 tr.reqhook td[rowspan],
 tr.reshook td[rowspan] {

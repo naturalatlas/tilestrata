@@ -691,7 +691,7 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			it('should include data from strata.healthy if set', function(done) {
+			it('should include data from "healthy" user function if set', function(done) {
 				var server = new TileServer({
 					healthy: function(callback) {
 						return callback(null, {'host': '(overridden)', 'commit': 000000, 'message': '"Hello"'});
@@ -718,7 +718,7 @@ describe('TileServer', function() {
 					});
 				});
 			});
-			it('should return 500 if strata.healthy returns an error', function(done) {
+			it('should return 500 if "healthy" user function returns an error', function(done) {
 				var now = Date.now();
 				var server = new TileServer({
 					healthy: function(callback) {
