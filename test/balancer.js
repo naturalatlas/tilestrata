@@ -1,0 +1,159 @@
+var http = require('http');
+var async = require('async');
+var assert = require('chai').assert;
+var tilestrata = require('../index.js');
+var noop = function() {};
+var balancer, strata;
+
+describe('TileStrata Balancer integration', function() {
+	afterEach(function(done) {
+		async.parallel([
+			function(callback) { if (balancer) { balancer.close(callback); } else { callback(); }},
+			function(callback) { if (strata) { strata.close(callback); } else { callback(); }}
+		], function(err) { done(); });
+	});
+
+
+	it('should POST to /register until "201 Created" received', function(done) {
+		this.timeout(1000);
+		var calls = 0;
+
+		async.series([
+			function setupBalancer(callback) {
+				balancer = http.createServer(function(req, res) {
+					var i = ++calls;
+					if (i <= 2) return; // timeout for two requests
+					assert.equal(req.method, 'POST');
+					assert.equal(req.url, '/register');
+					assert.equal(req.headers['content-type'], 'application/json');
+					if (i <= 4) { // error for two requests
+						res.writeHead(500, {});
+						return res.end('err');
+					}
+
+					if (i >= 6) throw new Error('Called /register too many times');
+					res.writeHead(201, {'Content-Type': 'application/json'})
+					res.end('{"check_interval": 1000, "token": "a"}');
+
+					// finish up the test
+					setTimeout(done, 200);
+				});
+				balancer.listen(8891, callback);
+			},
+			function setupTileStrata(callback) {
+				strata = tilestrata({
+					balancer: {
+						register_mindelay: 10,
+						register_maxdelay: 10,
+						register_timeout: 100,
+						host: '127.0.0.1:8891'
+					}
+				});
+				strata.listen(8892, callback);
+			}
+		], function(err) {
+			if (err) throw err;
+		});
+	});
+
+	it('should attempt to re-register if /health pings from balancer stop', function(done) {
+		var check_interval = 10;
+
+		var reregistered = false;
+		var initial_establish = false;
+		var initial_response = function(req, res) {
+			initial_establish = true;
+			res.writeHead(201, {'Content-Type': 'application/json'})
+			res.end('{"check_interval": ' + check_interval + ', "token": "a"}');
+			cur_response = function() { throw new Error('Unexpected /register'); }
+		};
+
+		var cur_response = initial_response;
+
+		async.series([
+			function setupBalancer(callback) {
+				balancer = http.createServer(function(req, res) {
+					cur_response(req, res);
+				});
+				balancer.listen(8891, callback);
+			},
+			function setupTileStrata(callback) {
+				strata = tilestrata({
+					balancer: {
+						register_mindelay: 10,
+						register_maxdelay: 10,
+						register_timeout: 100,
+						host: '127.0.0.1:8891'
+					}
+				});
+				strata.listen(8888, callback);
+			},
+			function checkInitialStatus(callback) {
+				http.get({
+					hostname: '127.0.0.1',
+					port: 8888,
+					path: '/health',
+					headers: {'X-TileStrataBalancer-Token': 'a'}
+				}, function(res) {
+					assert.equal(res.statusCode, 200);
+					var body = '';
+					res.on('data', function(data) { body += data; });
+					res.on('end', function() {
+						var parsedBody = JSON.parse(body);
+						assert.deepEqual(parsedBody.balancer, {status: 'connecting'});
+						callback();
+					});
+				}).on('error', callback);
+			},
+			function waitForRegistration(callback) {
+				var interval = setInterval(function() {
+					if (initial_establish) {
+						clearInterval(interval);
+						return callback();
+					}
+				}, 10);
+			},
+			function issueMockHealthChecks(callback) {
+				async.timesSeries(5, function(i, callback) {
+					http.get({
+						hostname: '127.0.0.1',
+						port: 8888,
+						path: '/health',
+						headers: {'X-TileStrataBalancer-Token': 'a'}
+					}, function(res) {
+						assert.equal(res.statusCode, 200);
+						var body = '';
+						res.on('data', function(data) { body += data; });
+						res.on('end', function() { setTimeout(callback, 10); });
+					}).on('error', callback);
+				}, callback);
+			},
+			function waitForReRegistration(callback) {
+				cur_response = function(req, res) {
+					reregistered = true;
+					res.writeHead(201, {'Content-Type': 'application/json'})
+					res.end('{"check_interval": 1000, "token": "a"}');
+					cur_response = function() { throw new Error('Unexpected /register'); }
+				};
+				setTimeout(function() {
+					assert.isTrue(reregistered, 'Should have re-registered by 4 x check_interval');
+					done();
+				}, check_interval*4);
+			}
+		], function(err) {
+			if (err) throw err;
+		});
+	});
+});
+
+// should not recognize non-tbalanc
+
+/*
+
+
+				strata.layer('layera', {minZoom: 1, maxZoom: 3, bbox: [-117.243,36.9924,-102.042,49.0014]})
+					.route('tile.a').use({serve: noop});
+				strata.layer('layerb', {})
+					.route('tile.b').use({serve: noop});
+
+ */

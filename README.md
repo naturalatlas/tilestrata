@@ -94,6 +94,21 @@ app.use(tilestrata.middleware({
 
 ## Usage Notes
 
+### Metatile-Aware Load Balancing & Layer Sharding
+
+[WIP] TileStrata >= 2.0.0 supports integration with [TileStrata Balancer](https://github.com/naturalatlas/tilestrata-balancer), an elastic load balancer designed specifically for the nuances of tile serving – particularly [metatiles](http://wiki.openstreetmap.org/wiki/Meta_tiles). Generic load balancers have no knowledge of metatiles and thus will naively split tile requests out to multiple servers which leads to redundant rendering (slow and a waste of computing power).
+
+As an added bonus, the balancer does not assume all servers in the pool have the same layers available. The balancer keeps track of the layers provided on each node so it knows where to route. Recap of what it provides:
+
+- Fully elastic & minimal setup
+- Consistent routing (improves cache hits)
+- Metatile-aware (prevents redundant rendering)
+- Layer-aware (allows heterogenous distribution of layers in the cluster)
+
+[**TileStrata Balancer Readme →**](https://github.com/naturalatlas/tilestrata-balancer)
+
+*Note:* One could use cookie-persistence with a traditional LB, but this forces users onto a single machine (not optimal).
+
 ### Rebuilding the Tile Cache
 
 If you update your map styles or data, you'll probably want to update your tiles. Rather than dump of them at once and bring your tile server to a crawl, progressively rebuild the cache by requesting tiles with the `X-TileStrata-SkipCache` header. [TileMantle](https://github.com/naturalatlas/tilemantle) makes this process easy:
@@ -150,6 +165,9 @@ Unless the `TILESTRATA_NOPROFILE` environment variable is set, TileStrata keeps 
 
 ##### server.listen(port, [hostname], [callback])
 Starts accepting requests on the specified port. The arguments to this method are exactly identical to node's http.Server [listen()](http://nodejs.org/api/http.html#http_server_listen_port_hostname_backlog_callback) method. It returns the [http.Server](https://nodejs.org/api/http.html#http_class_http_server) instance.
+
+##### server.close([callback])
+Stops listening for incoming requests on the port. If [TileStrata Balancer](https://github.com/naturalatlas/tilestrata-balancer) is configured, it will also proactively notify it so that the node is removed from the pool.
 
 ##### server.layer(name, [opts])
 Registers a new layer with the given name and returns its [TileLayer](#tilelayer) instance. If the layer already exists, the existing instance will be returned. Whatever name is used will be the first part of the url that can be used to fetch tiles: `/:layer/...`. The following options can be provided:

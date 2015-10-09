@@ -673,7 +673,7 @@ describe('TileServer', function() {
 			var pkg = require('../package.json');
 			it('should return a 200 OK normally', function(done) {
 				var server = new TileServer();
-				var httpserver = server.listen(8888, function(err) {
+				server.listen(8888, function(err) {
 					if (err) throw err;
 					http.get('http://localhost:8888/health', function(res) {
 						var body = '';
@@ -686,7 +686,7 @@ describe('TileServer', function() {
 							delete parsedBody.uptime;
 							assert.deepEqual(parsedBody, expected);
 							assert.equal(res.headers['content-type'], 'application/json');
-							httpserver.close(done);
+							server.close(done);
 						});
 					});
 				});
@@ -697,7 +697,7 @@ describe('TileServer', function() {
 						return callback(null, {'host': '(overridden)', 'commit': 000000, 'message': '"Hello"'});
 					}
 				});
-				var httpserver = server.listen(8888, function(err) {
+				server.listen(8888, function(err) {
 					if (err) throw err;
 					http.get('http://localhost:8888/health', function(res) {
 						var body = '';
@@ -713,7 +713,7 @@ describe('TileServer', function() {
 								commit: 000000,
 								message: '"Hello"'
 							});
-							httpserver.close(done);
+							server.close(done);
 						});
 					});
 				});
@@ -725,7 +725,7 @@ describe('TileServer', function() {
 						callback(new Error('CPU usage too high'))
 					}
 				});
-				var httpserver = server.listen(8888, function(err) {
+				server.listen(8888, function(err) {
 					if (err) throw err;
 					http.get('http://localhost:8888/health', function(res) {
 						var body = '';
@@ -740,7 +740,7 @@ describe('TileServer', function() {
 								host: os.hostname(),
 								message: 'CPU usage too high'
 							});
-							httpserver.close(done);
+							server.close(done);
 						});
 					});
 				});
@@ -748,7 +748,7 @@ describe('TileServer', function() {
 			it('should not expose hostname if TILESTRATA_HIDEHOSTNAME=1', function(done) {
 				process.env.TILESTRATA_HIDEHOSTNAME = '1';
 				var server = new TileServer();
-				var httpserver = server.listen(8888, function(err) {
+				server.listen(8888, function(err) {
 					if (err) throw err;
 					http.get('http://localhost:8888/health', function(res) {
 						var body = '';
@@ -759,7 +759,7 @@ describe('TileServer', function() {
 							var parsedBody = JSON.parse(body);
 							delete parsedBody.uptime;
 							assert.deepEqual(parsedBody, expected);
-							httpserver.close(done);
+							server.close(done);
 						});
 					});
 				});
