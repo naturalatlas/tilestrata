@@ -1,6 +1,7 @@
 var http = require('http');
 var async = require('async');
 var assert = require('chai').assert;
+var version = require('../package.json').version;
 var tilestrata = require('../index.js');
 var noop = function() {};
 var balancer, strata;
@@ -31,6 +32,7 @@ describe('TileStrata Balancer integration', function() {
 					req.on('data', function (data) { body += data; });
 					req.on('end', function () {
 						assert.deepEqual(JSON.parse(body), {
+							version: version,
 							listen_port: 8892,
 							node_weight: 5,
 							layers: [
