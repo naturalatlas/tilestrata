@@ -96,18 +96,18 @@ app.use(tilestrata.middleware({
 
 ### Metatile-Aware Load Balancing & Layer Sharding
 
-[WIP] TileStrata >= 2.0.0 supports integration with [TileStrata Balancer](https://github.com/naturalatlas/tilestrata-balancer), an elastic load balancer designed specifically for the nuances of tile serving – particularly [metatiles](http://wiki.openstreetmap.org/wiki/Meta_tiles). Generic load balancers have no knowledge of metatiles and thus will naively split tile requests out to multiple servers which leads to redundant rendering (slow and a waste of computing power).
+*[WIP]* TileStrata >= [2.0.0](https://github.com/naturalatlas/tilestrata/releases/tag/v2.0.0) supports integration with [TileStrata Balancer](https://github.com/naturalatlas/tilestrata-balancer), an elastic load balancer designed specifically for the nuances of tile serving – particularly [metatiles](http://wiki.openstreetmap.org/wiki/Meta_tiles). Generic load balancers have no knowledge of metatiles and thus will naively split tile requests out to multiple servers which leads to redundant rendering (slow and a waste of computing power).
 
-As an added bonus, the balancer does not assume all servers in the pool have the same layers available. The balancer keeps track of the layers provided on each node so it knows where to route. Recap of what it provides:
+As an added bonus, the balancer does not assume all servers in the pool have the same layers available. The balancer keeps track of the layers provided on each node so it knows where to route. In sum, it features:
 
-- Fully elastic & minimal setup
-- Consistent routing (improves cache hits)
-- Metatile-aware (prevents redundant rendering)
-- Layer-aware (allows heterogenous distribution of layers in the cluster)
+- **Fully elastic** w/minimal setup
+- **Consistent routing** (improves cache hits)
+- **Metatile-aware** (prevents redundant rendering)
+- **Layer-aware** (allows heterogenous distribution of layers in the cluster)
 
 [**TileStrata Balancer Readme →**](https://github.com/naturalatlas/tilestrata-balancer)
 
-*Note:* One could use cookie-persistence with a traditional LB, but this forces users onto a single machine (not optimal).
+*Note: One could use cookie-persistence with a traditional LB, but this forces users onto a single machine (not optimal).*
 
 ### Rebuilding the Tile Cache
 
