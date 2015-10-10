@@ -2,6 +2,7 @@ var TileServer = require('../lib/TileServer.js');
 var TileLayer = require('../lib/TileLayer.js');
 var TileRequest = require('../lib/TileRequest.js');
 var assert = require('chai').assert;
+var async = require('async');
 var http = require('http');
 var os = require('os');
 var version = require('../package.json').version;
@@ -764,6 +765,18 @@ describe('TileServer', function() {
 						});
 					});
 				});
+			});
+		});
+	});
+	describe('close()', function() {
+		it('should be idempotent', function(done) {
+			var server = new TileServer();
+			server.listen(8899, function(err) {
+				if (err) throw err;
+				async.series([
+					server.close.bind(server),
+					server.close.bind(server)
+				], done)
 			});
 		});
 	});
