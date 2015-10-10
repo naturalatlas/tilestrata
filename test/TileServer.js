@@ -775,8 +775,14 @@ describe('TileServer', function() {
 				if (err) throw err;
 				async.series([
 					server.close.bind(server),
-					server.close.bind(server)
-				], done)
+					server.close.bind(server),
+					function(callback) {
+						async.parallel([
+							server.close.bind(server),
+							server.close.bind(server),
+						], callback)
+					}
+				], done);
 			});
 		});
 	});
