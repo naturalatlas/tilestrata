@@ -9,6 +9,8 @@
 $ npm install tilestrata --save
 ```
 
+### Table of Contents
+
 - [Introduction](#introduction)
 - [Configuration](#configuration)
   - [Basics](#configuration)
@@ -20,7 +22,7 @@ $ npm install tilestrata --save
 - [API Reference](#api-reference)
 - [Plugin Developer Guide](#writing-tilestrata-plugins)
 
-### Introduction
+## Introduction
 
 TileStrata consists of five main actors, usually implemented as plugins:
 
