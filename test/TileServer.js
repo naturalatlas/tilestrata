@@ -507,7 +507,7 @@ describe('TileServer', function() {
 				});
 
 			server.initialize(function(err) {
-				assert.isFalse(!!err);
+				if (err) throw err;
 				assert.isTrue(_layer1_provider1);
 				assert.isTrue(_layer1_provider2);
 				assert.isTrue(_layer2_provider1);
@@ -557,7 +557,7 @@ describe('TileServer', function() {
 					.use({serve: function() {}});
 
 			server.initialize(function(err) {
-				assert.isFalse(!!err);
+				if (err) throw err;
 				assert.isTrue(_layer1_transform1);
 				assert.isTrue(_layer1_transform2);
 				assert.isTrue(_layer2_transform1);
@@ -610,7 +610,7 @@ describe('TileServer', function() {
 					.use({serve: function() {}});
 
 			server.initialize(function(err) {
-				assert.isFalse(!!err);
+				if (err) throw err;
 				assert.isTrue(_layer1_cache1);
 				assert.isTrue(_layer1_cache2);
 				assert.isTrue(_layer2_cache1);
@@ -769,6 +769,34 @@ describe('TileServer', function() {
 		});
 	});
 	describe('close()', function() {
+		it('should call destroy on all plugins', function(done) {
+			var _closed_provider = false;
+			var _closed_transform = false;
+			var _closed_reqhook = false;
+			var _closed_reshook = false;
+			var _closed_cache = false;
+			var server = new TileServer();
+
+			server.layer('layer1')
+				.route('tile.png')
+				.use({serve: function() {}, destroy: function(_server, callback) { assert.equal(_server, server); _closed_provider = true; callback(new Error('Expected Fail')); }})
+				.use({reqhook: function() {}, destroy: function(_server, callback) { assert.equal(_server, server); _closed_reqhook = true; callback(new Error('Expected Fail')); }})
+				.use({reshook: function() {}, destroy: function(_server, callback) { assert.equal(_server, server); _closed_reshook = true; callback(new Error('Expected Fail')); }})
+				.use({transform: function() {}, destroy: function(_server, callback) { assert.equal(_server, server); _closed_transform = true; callback(new Error('Expected Fail')); }})
+				.use({get: function() {}, set: function() {}, destroy: function(_server, callback) { assert.equal(_server, server); _closed_cache = true; callback(new Error('Expected Fail')); }});
+
+			server.initialize(function(err) {
+				if (err) throw err;
+				server.close(function() {
+					assert.isTrue(_closed_provider, 'Closed provider');
+					assert.isTrue(_closed_transform, 'Closed transform');
+					assert.isTrue(_closed_reqhook, 'Closed reqhook');
+					assert.isTrue(_closed_reshook, 'Closed reshook');
+					assert.isTrue(_closed_cache, 'Closed cache');
+					done();
+				});
+			});
+		});
 		it('should be idempotent', function(done) {
 			var server = new TileServer();
 			server.listen(8899, function(err) {

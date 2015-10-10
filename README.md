@@ -220,9 +220,11 @@ Returns an identical copy of the tile request that's safe to mutate.
 
 ## Writing TileStrata Plugins
 
+All plugins allow optional `init` and `destroy` lifecycle methods that will be called at startup and teardown. The first argument will be the [TileServer](#tileserver) instance, and the second will be the `callback`.
+
 ### Writing Request Hooks
 
-A request hook implementation needs one method: `reqhook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). This makes it possible to respond without even getting to the tile-serving logic (just don't call the callback).
+A request hook implementation needs one method: `reqhook`. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). This makes it possible to respond without even getting to the tile-serving logic (just don't call the callback).
 
 ```js
 module.exports = function(options) {
@@ -233,6 +235,9 @@ module.exports = function(options) {
         },
         reqhook: function(server, tile, req, res, callback) {
             callback();
+        },
+        destroy: function(server, callback) {
+            callback(err);
         }
     };
 };
@@ -240,7 +245,7 @@ module.exports = function(options) {
 
 ### Writing Caches
 
-A cache implementation needs two methods: `get`, `set`. Optionally a cache can declare an `init` method that gets called when the server is initializing. If a cache fails (returns an error to the callback), the server will ignore the error and attempt to serve the tile from the registered provider.
+A cache implementation needs two methods: `get`, `set`. If a cache fails (returns an error to the callback), the server will ignore the error and attempt to serve the tile from the registered provider.
 
 ```js
 module.exports = function(options) {
@@ -253,6 +258,9 @@ module.exports = function(options) {
             callback(err, buffer, headers, /* refresh */);
         },
         set: function(server, tile, buffer, headers, callback) {
+            callback(err);
+        },
+        destroy: function(server, callback) {
             callback(err);
         }
     };
@@ -267,7 +275,7 @@ callback(null, buffer, headers, true);
 
 ### Writing Providers
 
-Providers are responsible for building tiles. A provider must define a `serve` method and optionally an `init` method that is called when the server starts.
+Providers are responsible for building tiles. A provider must define a `serve` method:
 
 ```js
 module.exports = function(options) {
@@ -278,6 +286,9 @@ module.exports = function(options) {
         },
         serve: function(server, tile, callback) {
             callback(err, buffer, headers);
+        },
+        destroy: function(server, callback) {
+            callback(err);
         }
     };
 };
@@ -285,7 +296,7 @@ module.exports = function(options) {
 
 ### Writing Transforms
 
-Transforms modify the result from a provider before it's served (and cached). A tranform must define a `transform` method and optionally an `init` method.
+Transforms modify the result from a provider before it's served (and cached). A tranform must define a `transform` method:
 
 ```js
 module.exports = function(options) {
@@ -296,6 +307,9 @@ module.exports = function(options) {
         },
         transform: function(server, tile, buffer, headers, callback) {
             callback(err, buffer, headers);
+        },
+        destroy: function(server, callback) {
+            callback(err);
         }
     };
 };
@@ -303,7 +317,7 @@ module.exports = function(options) {
 
 ### Writing Response Hooks
 
-A response hook implementation needs one method: `reshook`. Optionally it can include an `init` method that gets called when the server is initializing. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). The "result" argument contains three properties: `headers`, `buffer`, and `status` — each of which can be modified to affect the final response.
+A response hook implementation needs one method: `reshook`. The hook's "req" will be a [http.IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) and "res" will be the [http.ServerResponse](http://nodejs.org/api/http.html#http_class_http_serverresponse). The "result" argument contains three properties: `headers`, `buffer`, and `status` — each of which can be modified to affect the final response.
 
 ```js
 module.exports = function(options) {
@@ -314,6 +328,9 @@ module.exports = function(options) {
         },
         reshook: function(server, tile, req, res, result, callback) {
             callback();
+        },
+        destroy: function(server, callback) {
+            callback(err);
         }
     };
 };
