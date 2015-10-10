@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/naturalatlas/tilestrata.svg)](https://travis-ci.org/naturalatlas/tilestrata)
 [![Coverage Status](http://img.shields.io/codecov/c/github/naturalatlas/tilestrata/master.svg?style=flat)](https://codecov.io/github/naturalatlas/tilestrata)
 
-*TileStrata is a pluggable "slippy map" tile server that emphasizes code-as-configuration.* It's clean, highly tested, performant, and integrates effortlessly with an elastic load balancer designed specifically for tile serving: [TileStrata Balancer](https://github.com/naturalatlas/tilestrata-balancer). After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js. The primary goal is painless extendability.
+*TileStrata is a pluggable "slippy map" tile server that emphasizes code-as-configuration.* The primary goal is painless extendability. It's clean, highly tested, performant, and integrates seamlessly with an elastic load balancer designed specifically for tile serving: [TileStrata Balancer](https://github.com/naturalatlas/tilestrata-balancer). Also, there's a built-in profiler and dashboard for debugging render times ([read more](#profiling--debugging-performance)).
 
 ```sh
 $ npm install tilestrata --save
@@ -18,7 +18,7 @@ $ npm install tilestrata --save
   - [Health Checks](#health-checks)
   - [Profiling / Debugging Performance](#profiling--debugging-performance)
 - [API Reference](#api-reference)
-- [Plugin Guide](#writing-tilestrata-plugins)
+- [Plugin Developer Guide](#writing-tilestrata-plugins)
 
 ### Introduction
 
@@ -26,7 +26,7 @@ TileStrata consists of five main actors, usually implemented as plugins:
 
 - [*"provider"*](#writing-providers) – Generates a new tile (e.g mapnik)
 - [*"cache"*](#writing-caches) – Persists a tile for later requests (e.g. filesystem)
-- [*"transform"*](#writing-tranforms) – Takes a raw tile and transforms it (e.g. image scaling / compression)
+- [*"transform"*](#writing-transforms) – Takes a raw tile and transforms it (e.g. image scaling / compression)
 - [*"request hook"*](#writing-request-hooks) – Called at the very beginning of a tile request.
 - [*"response hook"*](#writing-response-hooks) – Called right before a tile is served to the client.
 
