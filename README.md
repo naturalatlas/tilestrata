@@ -3,11 +3,22 @@
 [![Build Status](https://travis-ci.org/naturalatlas/tilestrata.svg)](https://travis-ci.org/naturalatlas/tilestrata)
 [![Coverage Status](http://img.shields.io/codecov/c/github/naturalatlas/tilestrata/master.svg?style=flat)](https://codecov.io/github/naturalatlas/tilestrata)
 
-TileStrata is a pluggable "slippy map" tile server that emphasizes code-as-configuration. It's clean, highly tested, and performant. After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js. The primary goal is painless extendability.
+*TileStrata is a pluggable "slippy map" tile server that emphasizes code-as-configuration.* It's clean, highly tested, performant, and integrates effortlessly with an elastic load balancer designed specifically for tile serving: [TileStrata Balancer](https://github.com/naturalatlas/tilestrata-balancer). After using [TileStache](http://tilestache.org/) (excellent) we decided we needed something that more-closely matched our stack: Node.js. The primary goal is painless extendability.
 
 ```sh
 $ npm install tilestrata --save
 ```
+
+- [Introduction](#introduction)
+- [Configuration](#configuration)
+  - [Basics](#configuration)
+  - [Express.js / Connect Integration](#integrate-with-expressjs--connect)
+  - [Metatile-Aware Load Balancing](#metatile-aware-load-balancing--layer-sharding)
+  - [Rebuilding the Tile Cache](#rebuilding-the-tile-cache)
+  - [Health Checks](#health-checks)
+  - [Profiling / Debugging Performance](#profiling--debugging-performance)
+- [API Reference](#api-reference)
+- [Plugin Guide](#writing-tilestrata-plugins)
 
 ### Introduction
 
