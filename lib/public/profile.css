@@ -1,11 +1,18 @@
+a, a:hover, a:visited {
+	color: inherit;
+	text-decoration: none;
+	outline: none;
+}
 html, body {
-	font-size: 12px;
-	font-family: monospace;
-	-webkit-font-smoothing: antialiased;
 	margin: 0;
 	padding: 0;
 	background: #151D1F;
 	color: #fff;
+}
+html, body, td {
+	font-size: 12px;
+	font-family: monospace;
+	-webkit-font-smoothing: antialiased;
 }
 body {
 	padding: 10px;
@@ -40,6 +47,7 @@ h2 {
 	border-right: 1px solid #000;
 }
 td {
+	color: #222;
 	padding: 2px;
 	border-color: #DEE2E2;
 }
@@ -51,6 +59,12 @@ tr:nth-child(2n) td {
 }
 tr:nth-child(2n+1) td {
 	background: #ffffff;
+}
+tr:nth-child(2n) td.empty {
+	background: #F1F1F1;
+}
+tr:nth-child(2n+1) td.empty {
+	background: #ECECEC;
 }
 tr td[rowspan] {
 	border-color: #111;
@@ -133,7 +147,6 @@ td.critical > * {
 }
 
 table {
-	color: #222;
 	width: 100%;
     border-collapse: collapse;
     margin: 0;
