@@ -1,5 +1,6 @@
 var http = require('http');
 var async = require('async');
+var log = require('npmlog');
 var assert = require('chai').assert;
 var version = require('../package.json').version;
 var tilestrata = require('../index.js');
@@ -8,10 +9,15 @@ var balancer, strata;
 
 describe('TileStrata Balancer integration', function() {
 	afterEach(function(done) {
-		async.parallel([
-			function(callback) { if (balancer) { balancer.close(callback); } else { callback(); }},
-			function(callback) { if (strata) { strata.close(callback); } else { callback(); }}
-		], function(err) { done(); });
+		var closed = 0;
+		async.series([
+			// close the mock balancer first so that DELETE calls don't come through when strata closed
+			function(callback) { if (balancer) { closed++; balancer.close(callback); } else { callback(); }},
+			function(callback) { if (strata) { closed++; strata.close(callback); } else { callback(); }}
+		], function(err) {
+			log.info('test', 'afterEach(): ' + closed + ' listener(s) stopped');
+			done();
+		});
 	});
 
 	it('should call DELETE /nodes/:id on close()', function(done) {
@@ -74,6 +80,7 @@ describe('TileStrata Balancer integration', function() {
 	it('should POST to /nodes until "201 Created" received', function(done) {
 		this.timeout(1000);
 		var calls = 0;
+		var finished = false;
 
 		async.series([
 			function setupBalancer(callback) {
@@ -108,7 +115,8 @@ describe('TileStrata Balancer integration', function() {
 							return res.end('err');
 						}
 
-						if (i >= 6) throw new Error('Called /nodes too many times');
+						if (finished) throw new Error('Called /nodes too many times');
+						finished = true;
 						res.writeHead(201, {'Content-Type': 'application/json'})
 						res.end('{"check_interval": 1000, "token": "a"}');
 
@@ -279,7 +287,7 @@ describe('TileStrata Balancer integration', function() {
 				setTimeout(function() {
 					assert.isAbove(reconnects, 2);
 					done();
-				}, check_interval * 4);
+				}, check_interval * 10);
 			}
 		], function(err) {
 			if (err) throw err;
