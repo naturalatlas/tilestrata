@@ -30,6 +30,39 @@ describe('TileServer', function() {
 		var pkg = require('../package.json');
 		assert.equal(server.version, pkg.version);
 	});
+	it('should allow restart', function(done) {
+		var inits = 0;
+		var destroys = 0;
+		var server = new TileServer();
+		server.layer('mylayer').route('a.txt')
+			.use({
+				init: function(server, callback) { inits++; callback(); },
+				serve: function() {},
+				destroy: function(server, callback) { destroys++; callback(); }
+			});
+
+		server.listen(8983, function(err) {
+			if (err) throw err;
+			assert.equal(inits, 1, 'Inits');
+			assert.equal(destroys, 0, 'Destroys');
+			server.close(function(err) {
+				if (err) throw err;
+				assert.equal(inits, 1, 'Inits');
+				assert.equal(destroys, 1, 'Destroys');
+				server.listen(8983, function(err) {
+					if (err) throw err;
+					assert.equal(inits, 2, 'Inits');
+					assert.equal(destroys, 1, 'Destroys');
+					server.close(function(err) {
+						if (err) throw err;
+						assert.equal(inits, 2, 'Inits');
+						assert.equal(destroys, 2, 'Destroys');
+						done();
+					});
+				});
+			});
+		});
+	});
 	describe('uptime()', function() {
 		it('should return null if the server hasn\'t started', function() {
 			var server = new TileServer();
