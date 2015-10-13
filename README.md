@@ -120,7 +120,7 @@ As an added bonus, the balancer does not assume all servers in the pool have the
 
 [**View TileStrata Balancer Documentation →**](https://github.com/naturalatlas/tilestrata-balancer)
 
-*Note: One could use cookie-persistence with a traditional load balancers, but this forces users onto a single machine (not optimal).*
+*Note: One could use cookie-persistence with traditional load balancers, but this forces users onto a single machine (not optimal).*
 
 ### Rebuilding the Tile Cache
 
