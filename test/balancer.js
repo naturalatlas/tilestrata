@@ -148,7 +148,8 @@ describe('TileStrata Balancer integration', function() {
 	});
 
 	it('should attempt to re-register if /health pings from balancer stop', function(done) {
-		var check_interval = 10;
+		this.timeout(10000);
+		var check_interval = 500;
 
 		var reregistered = false;
 		var initial_establish = false;
@@ -227,9 +228,9 @@ describe('TileStrata Balancer integration', function() {
 					cur_response = function() { throw new Error('Unexpected call to /nodes'); }
 				};
 				setTimeout(function() {
-					assert.isTrue(reregistered, 'Should have re-registered by 4 x check_interval');
+					assert.isTrue(reregistered, 'Should have re-registered by 3 x check_interval');
 					done();
-				}, check_interval*4);
+				}, check_interval*3 + 1500);
 			}
 		], function(err) {
 			if (err) throw err;
@@ -237,8 +238,9 @@ describe('TileStrata Balancer integration', function() {
 	});
 
 	it('should not recognize /health pings w/o proper X-TileStrataBalancer-Token header', function(done) {
+		this.timeout(10000);
 		var reconnects = 0;
-		var check_interval = 10;
+		var check_interval = 250;
 
 		async.series([
 			function setupBalancer(callback) {
@@ -284,10 +286,11 @@ describe('TileStrata Balancer integration', function() {
 				}, callback);
 			},
 			function checkReconnects(callback) {
+				var invalid_checks = 5;
 				setTimeout(function() {
 					assert.isAbove(reconnects, 2);
 					done();
-				}, check_interval * 10);
+				}, (check_interval * 3 + 1000) * 2);
 			}
 		], function(err) {
 			if (err) throw err;
