@@ -68,7 +68,7 @@ strata.layer('basemap')
     .route('tile@2x.png')
         .use(disk.cache({dir: '/var/lib/tiles/basemap'}))
         .use(mapnik({
-            xml: '/path/to/map.xml',
+            pathname: '/path/to/map.xml',
             tileSize: 512,
             scale: 2
         }))
