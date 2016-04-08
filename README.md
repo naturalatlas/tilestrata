@@ -125,7 +125,7 @@ As an added bonus, the balancer does not assume all servers in the pool have the
 
 ### Rebuilding the Tile Cache
 
-If you update your map styles or data, you'll probably want to update your tiles. Rather than dump of them at once and bring your tile server to a crawl, progressively rebuild the cache by requesting tiles with the `X-TileStrata-SkipCache` header. [TileMantle](https://github.com/naturalatlas/tilemantle) makes this process easy:
+If you update your map styles or data, you'll probably want to update your tiles. Rather than dump all of them at once and bring your tile server to a crawl, progressively rebuild the cache by requesting tiles with the `X-TileStrata-SkipCache` header. [TileMantle](https://github.com/naturalatlas/tilemantle) makes this process easy:
 
 ```
 npm install -g tilemantle
@@ -359,7 +359,7 @@ $ npm test
 
 ## License
 
-Copyright &copy; 2014–2015 [Natural Atlas, Inc.](https://github.com/naturalatlas) & [Contributors](https://github.com/naturalatlas/tilestrata/graphs/contributors)
+Copyright &copy; 2014–2016 [Natural Atlas, Inc.](https://github.com/naturalatlas) & [Contributors](https://github.com/naturalatlas/tilestrata/graphs/contributors)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
 
