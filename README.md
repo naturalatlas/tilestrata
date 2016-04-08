@@ -52,6 +52,7 @@ TileStrata consists of five main actors, usually implemented as plugins:
 - [tilestrata-proxy](https://github.com/naturalatlas/tilestrata-proxy) – Fetches tiles from other servers
 - [tilestrata-lru](https://github.com/naturalatlas/tilestrata-lru) – Caches tiles in memory (LRU)
 - [tilestrata-etag](https://github.com/naturalatlas/tilestrata-etag) – Configurable Conditional GET support (with ETags)
+- [tilestrata-bing](https://github.com/naturalatlas/tilestrata-bing) – Provider for Bing Maps tiles
 
 ## Configuration
 
