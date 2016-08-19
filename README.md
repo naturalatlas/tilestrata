@@ -53,6 +53,7 @@ TileStrata consists of five main actors, usually implemented as plugins:
 - [tilestrata-lru](https://github.com/naturalatlas/tilestrata-lru) – Caches tiles in memory (LRU)
 - [tilestrata-etag](https://github.com/naturalatlas/tilestrata-etag) – Configurable Conditional GET support (with ETags)
 - [tilestrata-bing](https://github.com/naturalatlas/tilestrata-bing) – Provider for Bing Maps tiles
+- [tilestrata-underzoom](https://github.com/naturalatlas/tilestrata-underzoom) - Build mosaics of higher-zoom tiles
 
 ## Configuration
 
