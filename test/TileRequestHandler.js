@@ -825,15 +825,17 @@ describe('TileRequestHandler', function() {
 		});
 		it('should skip cache get if "X-TileStrata-SkipCache" header present and matches', function(done) {
 			var mockServer = new TileServer();
-			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': 'a/tile.png,layer/tile.png'});
+			var mockRequest = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': 'a/tile.png,layer/tile.png', 'x-tilestrata-cachewait': true});
 			var handler = new TileRequestHandler();
+			var cacheSet = false;
 
 			handler.use({
 				get: function(server, req, callback) {
 					throw new Error('Cache get should not be executed');
 				},
 				set: function(server, req, buffer, headers, callback) {
-					done();
+					cacheSet = true;
+					setTimeout(callback, 20);
 				}
 			});
 
@@ -849,6 +851,8 @@ describe('TileRequestHandler', function() {
 				assert.equal(status, 200);
 				assert.equal(buffer.toString('utf8'), 'success');
 				assert.deepEqual(headers, {'X-Test-Status': 'success'});
+				if (!cacheSet) throw new Error('Cache set should have been called!');
+				done();
 			});
 		});
 		it('should not skip cache get if "X-TileStrata-SkipCache" header present and does not match', function(done) {
