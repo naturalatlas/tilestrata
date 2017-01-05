@@ -719,6 +719,7 @@ describe('TileServer', function() {
 							var parsedBody = JSON.parse(body);
 							assert.match(parsedBody.uptime, /^\d+(\.\d+)? seconds$/);
 							delete parsedBody.uptime;
+							delete parsedBody.uptime_s;
 							assert.deepEqual(parsedBody, expected);
 							assert.equal(res.headers['content-type'], 'application/json');
 							server.close(done);
@@ -740,6 +741,7 @@ describe('TileServer', function() {
 						res.on('end', function() {
 							var parsedBody = JSON.parse(body);
 							delete parsedBody.uptime;
+							delete parsedBody.uptime_s;
 							assert.equal(res.statusCode, 200);
 							assert.deepEqual(parsedBody, {
 								ok: true,
@@ -768,6 +770,7 @@ describe('TileServer', function() {
 						res.on('end', function() {
 							var parsedBody = JSON.parse(body);
 							delete parsedBody.uptime;
+							delete parsedBody.uptime_s;
 							assert.equal(res.statusCode, 500);
 							assert.deepEqual(parsedBody, {
 								ok: false,
@@ -793,6 +796,7 @@ describe('TileServer', function() {
 							var expected = {ok: true, version: pkg.version, host: '(hidden)'};
 							var parsedBody = JSON.parse(body);
 							delete parsedBody.uptime;
+							delete parsedBody.uptime_s;
 							assert.deepEqual(parsedBody, expected);
 							server.close(done);
 						});

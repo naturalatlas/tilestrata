@@ -81,6 +81,7 @@ describe('require("tilestrata")', function() {
 			testMiddleware(middleware, '/tiles/health', false, {status: 200, headers: expected_headers, buffer: function(actual_buffer) {
 				var parsedBody = JSON.parse(actual_buffer);
 				delete parsedBody.uptime;
+				delete parsedBody.uptime_s;
 				assert.deepEqual(parsedBody, {ok: true, version: version, host: '(hidden)'});
 			}}, done);
 		});
