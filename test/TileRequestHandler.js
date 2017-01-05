@@ -1,3 +1,4 @@
+var async = require('async');
 var TileServer = require('../lib/TileServer.js');
 var TileRequest = require('../lib/TileRequest.js');
 var TileRequestHandler = require('../lib/TileRequestHandler.js');
@@ -852,6 +853,40 @@ describe('TileRequestHandler', function() {
 				assert.equal(buffer.toString('utf8'), 'success');
 				assert.deepEqual(headers, {'X-Test-Status': 'success'});
 				if (!cacheSet) throw new Error('Cache set should have been called!');
+				done();
+			});
+		});
+		it('should not batch requests with different "X-TileStrata-SkipCache" headers', function(done) {
+			var mockServer = new TileServer();
+			var handler = new TileRequestHandler();
+			var _calls = 0;
+			handler.use({
+				serve: function(server, req, callback) {
+					++_calls;
+					setTimeout(function() {
+						var _buffer = new Buffer('success', 'utf8');
+						callback(null, _buffer, {});
+					}, 10);
+				}
+			});
+
+			async.parallel([
+				function a(callback) {
+					var mockRequestA = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache': '*'});
+					handler.GET(mockServer, mockRequestA, function(status, buffer) {
+						assert.equal(buffer.toString('utf8'), 'success');
+						callback();
+					});
+				},
+				function b(callback) {
+					var mockRequestB = TileRequest.parse('/layer/1/2/3/tile.png', {});
+					handler.GET(mockServer, mockRequestB, function(status,buffer) {
+						assert.equal(buffer.toString('utf8'), 'success');
+						callback();
+					});
+				}
+			], function() {
+				assert.equal(_calls, 2, 'calls to provider');
 				done();
 			});
 		});
