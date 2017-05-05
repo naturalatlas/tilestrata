@@ -54,6 +54,7 @@ TileStrata consists of five main actors, usually implemented as plugins:
 - [tilestrata-etag](https://github.com/naturalatlas/tilestrata-etag) – Configurable Conditional GET support (with ETags)
 - [tilestrata-bing](https://github.com/naturalatlas/tilestrata-bing) – Provider for Bing Maps tiles
 - [tilestrata-underzoom](https://github.com/naturalatlas/tilestrata-underzoom) - Build mosaics of higher-zoom tiles
+- [tilestrata-postgismvt](https://github.com/Stezii/tilestrata-postgismvt) - Outputs Mapbox Vector Tiles from a PostGIS database
 
 ## Configuration
 
