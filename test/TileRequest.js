@@ -42,6 +42,18 @@ describe('TileRequest', function() {
 			assert.equal(result.qs, 'query=1&test=2');
 			assert.deepEqual(result.headers, {});
 
+			// no filename
+			result = TileRequest.parse('lyr1/1/2/3.png', null, null, true);
+			assert.instanceOf(result, TileRequest);
+			assert.equal(result.layer, 'lyr1');
+			assert.equal(result.filename, 'png');
+			assert.equal(result.z, 1);
+			assert.equal(result.x, 2);
+			assert.equal(result.y, 3);
+			assert.equal(result.method, 'GET');
+			assert.equal(result.qs, undefined);
+			assert.deepEqual(result.headers, {});
+
 			// headers
 			result = TileRequest.parse('lyr1/1/2/3/tile@2x.png?query=1&test=2', {'x-tilestrata-skipcache': '1'});
 			assert.instanceOf(result, TileRequest);
