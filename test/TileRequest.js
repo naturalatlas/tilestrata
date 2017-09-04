@@ -43,10 +43,10 @@ describe('TileRequest', function() {
 			assert.deepEqual(result.headers, {});
 
 			// no filename
-			result = TileRequest.parse('lyr1/1/2/3.png', null, null, true);
+			result = TileRequest.parse('lyr1/1/2/3.png', null, null);
 			assert.instanceOf(result, TileRequest);
 			assert.equal(result.layer, 'lyr1');
-			assert.equal(result.filename, 'png');
+			assert.equal(result.filename, '*.png');
 			assert.equal(result.z, 1);
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
