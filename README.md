@@ -206,7 +206,7 @@ The version of TileStrata (useful to plugins, mainly).
 
 ##### layer.route(filename, [options])
 
-Registers a route. Returns a [TileRequestHandler](#tilerequesthandler) instance to be configured. The available options are:
+Registers a route. Returns a [TileRequestHandler](#tilerequesthandler) instance to be configured. Setting the filename to `*.{extension}` will omit the filename from the request and make the tiles available at `/{z}/{x}/{y}.{extension}` (see [#21](https://github.com/naturalatlas/tilestrata/pull/21)). The available options are:
 
   - **cacheFetchMode**: Defines how cache fetching happens when multiple caches are configured. The mode can be `"sequential"` or `"race"`. If set to `"race"`, TileStrata will fetch from all caches simultaneously and return the first that wins.
 
