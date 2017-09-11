@@ -448,6 +448,56 @@ describe('TileServer', function() {
 				done();
 			});
 		});
+		it('should handle requests without a filename', function(done) {
+			var server = new TileServer();
+			server.layer('layer').route('*.png').use({
+				serve: function(_server, _req, callback) {
+					assert.equal(_server, server);
+					assert.instanceOf(_req, TileRequest);
+					assert.equal(_req.filename, 't.png');
+					assert.equal(_req.hasFilename, false);
+					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+				}
+			});
+
+			var req = TileRequest.parse('/layer/1/2/3.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'response');
+				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
+					'X-Test': 'hello',
+					'Content-Length': 8,
+					'Cache-Control': HEADER_CACHECONTROL
+				});
+				done();
+			});
+		});
+		it('should handle requests without a filename (with resolution)', function(done) {
+			var server = new TileServer();
+			server.layer('layer').route('*@2x.png').use({
+				serve: function(_server, _req, callback) {
+					assert.equal(_server, server);
+					assert.instanceOf(_req, TileRequest);
+					assert.equal(_req.filename, 't@2x.png');
+					assert.equal(_req.hasFilename, false);
+					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+				}
+			});
+
+			var req = TileRequest.parse('/layer/1/2/3@2x.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'response');
+				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
+					'X-Test': 'hello',
+					'Content-Length': 8,
+					'Cache-Control': HEADER_CACHECONTROL
+				});
+				done();
+			});
+		});
 	});
 	describe('getTile()', function() {
 		it('should return error if tile unavailable', function(done) {
@@ -486,6 +536,33 @@ describe('TileServer', function() {
 			});
 
 			server.getTile('layer', 'tile.png', 2, 3, 1, function(err, buffer, headers) {
+				assert.isTrue(_served);
+				assert.isNull(err);
+				assert.instanceOf(buffer, Buffer);
+				assert.equal(buffer.toString('utf8'), 'result');
+				assert.deepEqual(headers, {
+					'X-Powered-By': HEADER_XPOWEREDBY,
+					'X-Test': 'hello',
+					'Content-Length': 6,
+					'Cache-Control': HEADER_CACHECONTROL
+				});
+				done();
+			});
+		});
+		it('should return tile if available (no filename)', function(done) {
+			var _served = false;
+			var server = new TileServer();
+			server.layer('layer').route('*@2x.png').use({
+				serve: function(_server, _req, callback) {
+					_served = true;
+					assert.equal(_req.x, 2);
+					assert.equal(_req.y, 3);
+					assert.equal(_req.z, 1);
+					callback(null, new Buffer('result', 'utf8'), {'X-Test': 'hello'});
+				}
+			});
+
+			server.getTile('layer', '*@2x.png', 2, 3, 1, function(err, buffer, headers) {
 				assert.isTrue(_served);
 				assert.isNull(err);
 				assert.instanceOf(buffer, Buffer);

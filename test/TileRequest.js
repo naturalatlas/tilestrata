@@ -11,6 +11,7 @@ describe('TileRequest', function() {
 			assert.instanceOf(result, TileRequest);
 			assert.equal(result.layer, 'lyr');
 			assert.equal(result.filename, 'tile@2x.png');
+			assert.equal(result.hasFilename, true);
 			assert.equal(result.z, 1);
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
@@ -23,6 +24,7 @@ describe('TileRequest', function() {
 			assert.instanceOf(result, TileRequest);
 			assert.equal(result.layer, 'lyr');
 			assert.equal(result.filename, 'tile@2x.png');
+			assert.equal(result.hasFilename, true);
 			assert.equal(result.z, 1);
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
@@ -35,6 +37,7 @@ describe('TileRequest', function() {
 			assert.instanceOf(result, TileRequest);
 			assert.equal(result.layer, 'lyr1');
 			assert.equal(result.filename, 'tile@2x.png');
+			assert.equal(result.hasFilename, true);
 			assert.equal(result.z, 1);
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
@@ -46,7 +49,21 @@ describe('TileRequest', function() {
 			result = TileRequest.parse('lyr1/1/2/3.png', null, null);
 			assert.instanceOf(result, TileRequest);
 			assert.equal(result.layer, 'lyr1');
-			assert.equal(result.filename, '*.png');
+			assert.equal(result.filename, 't.png');
+			assert.equal(result.hasFilename, false);
+			assert.equal(result.z, 1);
+			assert.equal(result.x, 2);
+			assert.equal(result.y, 3);
+			assert.equal(result.method, 'GET');
+			assert.equal(result.qs, undefined);
+			assert.deepEqual(result.headers, {});
+
+			// no filename (with resolution suffix)
+			result = TileRequest.parse('lyr1/1/2/3@2x.png', null, null);
+			assert.instanceOf(result, TileRequest);
+			assert.equal(result.layer, 'lyr1');
+			assert.equal(result.filename, 't@2x.png');
+			assert.equal(result.hasFilename, false);
 			assert.equal(result.z, 1);
 			assert.equal(result.x, 2);
 			assert.equal(result.y, 3);
@@ -74,7 +91,7 @@ describe('TileRequest', function() {
 		});
 	});
 	describe('clone()', function() {
-		it('should return different, but identical, instance', function() {
+		it('should return different, but identical, instance (with filename)', function() {
 			var original = TileRequest.parse('lyr1/1/2/3/tile@2x.png?query=1&test=2', {'x-tilestrata-skipcache': '1'}, 'GET');
 
 			var clone = original.clone();
@@ -87,6 +104,25 @@ describe('TileRequest', function() {
 			assert.equal(clone.x, 2);
 			assert.equal(clone.y, 3);
 			assert.equal(clone.qs, 'query=1&test=2');
+			assert.equal(clone.hasFilename, true);
+
+			assert.notEqual(clone.headers, original.headers);
+			assert.deepEqual(clone.headers, {'x-tilestrata-skipcache': '1'});
+		});
+		it('should return different, but identical, instance (without filename)', function() {
+			var original = TileRequest.parse('lyr1/1/2/3@2x.png?query=1&test=2', {'x-tilestrata-skipcache': '1'}, 'GET');
+
+			var clone = original.clone();
+			assert.instanceOf(clone, TileRequest);
+			assert.notEqual(clone, original);
+			assert.equal(clone.layer, 'lyr1');
+			assert.equal(clone.method, 'GET');
+			assert.equal(clone.filename, 't@2x.png');
+			assert.equal(clone.z, 1);
+			assert.equal(clone.x, 2);
+			assert.equal(clone.y, 3);
+			assert.equal(clone.qs, 'query=1&test=2');
+			assert.equal(clone.hasFilename, false);
 
 			assert.notEqual(clone.headers, original.headers);
 			assert.deepEqual(clone.headers, {'x-tilestrata-skipcache': '1'});

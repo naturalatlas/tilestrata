@@ -93,6 +93,15 @@ Once configured and started, tiles can be accessed via:
 /:layer/:z/:x:/:y/:filename
 ```
 
+### Routing Without Filenames
+
+As of [2.1.0](https://github.com/naturalatlas/tilestrata/releases/tag/v2.1.0), if you desire a routing scheme that's closer to other tile servers (where there's no filename) like outlined in [#21](https://github.com/naturalatlas/tilestrata/pull/21), use the following format when registering routes:
+
+```js
+.route('*.png') // /layer/0/0/0.png
+.route('*@2x.png') // /layer/0/0/0@2x.png
+```
+
 ### Integrate with [Express.js](http://expressjs.com/) / [Connect](https://github.com/senchalabs/connect)
 
 TileStrata comes with middleware for Express that makes serving tiles from an existing application really simple, eliminating the need to call `listen` on `strata`.
@@ -206,7 +215,9 @@ The version of TileStrata (useful to plugins, mainly).
 
 ##### layer.route(filename, [options])
 
-Registers a route. Returns a [TileRequestHandler](#tilerequesthandler) instance to be configured. Setting the filename to `*.{extension}` will omit the filename from the request and make the tiles available at `/{z}/{x}/{y}.{extension}` (see [#21](https://github.com/naturalatlas/tilestrata/pull/21)). The available options are:
+Registers a route and returns a [TileRequestHandler](#tilerequesthandler) instance to be configured. Setting `filename` to something like `"*.ext"` or `"*@2x.ext"` will omit the filename from the request and make the tiles available at `/{z}/{x}/{y}.ext` and `/{z}/{x}/{y}@2x.ext`, respectively (see [#21](https://github.com/naturalatlas/tilestrata/pull/21)).
+
+The available options are:
 
   - **cacheFetchMode**: Defines how cache fetching happens when multiple caches are configured. The mode can be `"sequential"` or `"race"`. If set to `"race"`, TileStrata will fetch from all caches simultaneously and return the first that wins.
 
@@ -217,7 +228,9 @@ Registers a plugin, which is either a provider, cache, transform, request hook, 
 
 #### [TileRequest](#tilerequest)
 
-A request contains these properties: `x`, `y`, `z`, `layer` (string), `filename`, `method`, `headers`, and `qs`.
+A request contains these properties: `x`, `y`, `z`, `layer` (string), `filename`, `method`, `headers`, `qs`, and `hasFilename`.
+
+If a tile request is in the filenameless format ([see here](#routing-without-filenames)), `hasFilename` will be `false`. To illustrate: if the request is to `/layer/0/0/0@2x.png`, `filename` will be set to `t@2x.png` (for compatibility with caches and plugins that expect a filename) and `hasFilename` will be `false`.
 
 ##### tile.clone()
 Returns an identical copy of the tile request that's safe to mutate.
