@@ -33,7 +33,7 @@
     "lodash": "3.10.1",
     "npmlog": "^1.2.1",
     "recovery": "^0.2.6",
-    "request": "^2.64.0",
+    "request": "2.81.0",
     "tilebelt": "1.0.1",
     "uuid": "^3.0.0"
   },
