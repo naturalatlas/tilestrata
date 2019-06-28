@@ -4,3 +4,4 @@ node_modules
 *.tmp*
 test/profile.html
 test/profile.json
+package-lock.json
