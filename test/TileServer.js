@@ -498,6 +498,47 @@ describe('TileServer', function() {
 				done();
 			});
 		});
+		it('should not allow duplicate / mixed-case content-length headers', function(done) {
+			var server = new TileServer();
+			server.layer('layer').route('t.png')
+				.use({
+					serve: function(_server, _req, callback) {
+						callback(null, new Buffer('response', 'utf8'), {
+							'b': '3',
+							'X-Test': 'hello',
+							'cOnTeNt-LenGth': '123456'
+						});
+					}
+				})
+				.use({
+					transform: function(server, req, buffer, headers, callback) {
+						headers['a'] = '1';
+						callback(null, buffer, headers);
+					}
+				})
+				.use({
+					transform: function(server, req, buffer, headers, callback) {
+						headers['A'] = '3';
+						headers['B'] = '4';
+						callback(null, buffer, headers);
+					}
+				});
+
+			var req = TileRequest.parse('/layer/1/2/3/t.png', {}, 'GET');
+			server.serve(req, false, function(status, buffer, headers) {
+				assert.equal(status, 200);
+				assert.equal(buffer.toString('utf8'), 'response');
+				assert.deepEqual(headers, {
+					'A': '3',
+					'B': '4',
+					'X-Powered-By': HEADER_XPOWEREDBY,
+					'X-Test': 'hello',
+					'Content-Length': 8,
+					'Cache-Control': HEADER_CACHECONTROL
+				});
+				done();
+			});
+		});
 	});
 	describe('getTile()', function() {
 		it('should return error if tile unavailable', function(done) {

@@ -313,7 +313,7 @@ module.exports = function(options) {
 
 ### Writing Transforms
 
-Transforms modify the result from a provider before it's served (and cached). A tranform must define a `transform` method:
+Transforms modify the result from a provider before it's served (and cached). A transform must define a `transform` method:
 
 ```js
 module.exports = function(options) {
