@@ -56,7 +56,7 @@ server.layer('mylayer')
 		.use(noop_reqhook())
 		.use(noop_cache())
 		.use(noop_cache())
-		.use(noop_provider(new Buffer(0)))
+		.use(noop_provider(Buffer.from('', 'utf8')))
 		.use(noop_reshook())
 		.use(noop_reshook())
 	.route('10mb.bin')
@@ -136,4 +136,3 @@ suite
 		throw e.target.error;
 	})
 	.run();
-

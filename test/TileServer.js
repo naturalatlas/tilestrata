@@ -11,7 +11,7 @@ var HEADER_CACHECONTROL = 'max-age=60';
 var HEADER_XPOWEREDBY = 'TileStrata/' + version;
 var noop_provider = {
 	serve: function(server, req, callback) {
-		callback(null, new Buffer(''), {});
+		callback(null, Buffer.from('', 'utf8'), {});
 	}
 };
 
@@ -125,7 +125,7 @@ describe('TileServer', function() {
 						assert.equal(_server, server);
 						assert.instanceOf(_req, TileRequest);
 						assert.equal(_req.filename, 'tile.png');
-						callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+						callback(null, Buffer.from('response', 'utf8'), {'X-Test': 'hello'});
 					}
 				})
 				.use({reqhook: function(_server, _tile, _req, _res, callback) {
@@ -167,7 +167,7 @@ describe('TileServer', function() {
 						'Cache-Control': HEADER_CACHECONTROL
 					});
 					_result.headers['X-Res-Hook-2'] = '1';
-					_result.buffer = new Buffer(_result.buffer.toString('utf8') + '-modified');
+					_result.buffer = Buffer.from(_result.buffer.toString('utf8') + '-modified', 'utf8');
 					callback();
 				}});
 
@@ -280,7 +280,7 @@ describe('TileServer', function() {
 			var server = new TileServer();
 			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use({
 				serve: function(server, req, callback) {
-					callback(null, new Buffer('Valid'), {});
+					callback(null, Buffer.from('Valid', 'utf8'), {});
 				}
 			});
 
@@ -302,7 +302,7 @@ describe('TileServer', function() {
 			var server = new TileServer();
 			server.layer('layer', {bbox: valid_bbox}).route('tile.png').use({
 				serve: function(server, req, callback) {
-					callback(null, new Buffer('Valid'), {});
+					callback(null, Buffer.from('Valid', 'utf8'), {});
 				}
 			});
 
@@ -346,7 +346,7 @@ describe('TileServer', function() {
 			server.layer('layer').route('tile.png').use({
 				serve: function(_server, _req, callback) {
 					assert.deepEqual(_req.headers, {'x-tilestrata-skipcache':'1'});
-					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+					callback(null, Buffer.from('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 			var req = TileRequest.parse('/layer/1/2/3/tile.png', {'x-tilestrata-skipcache':'1'}, 'GET');
@@ -361,7 +361,7 @@ describe('TileServer', function() {
 					assert.equal(_server, server);
 					assert.instanceOf(_req, TileRequest);
 					assert.equal(_req.filename, 'tile.png');
-					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+					callback(null, Buffer.from('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
@@ -383,7 +383,7 @@ describe('TileServer', function() {
 			server.layer('layer').route('tile.png')
 				.use({
 					serve: function(_server, _req, callback) {
-						callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+						callback(null, Buffer.from('response', 'utf8'), {'X-Test': 'hello'});
 					}
 				})
 				.use({
@@ -431,7 +431,7 @@ describe('TileServer', function() {
 					assert.equal(_server, server);
 					assert.instanceOf(_req, TileRequest);
 					assert.equal(_req.filename, 'tile.png');
-					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+					callback(null, Buffer.from('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
@@ -456,7 +456,7 @@ describe('TileServer', function() {
 					assert.instanceOf(_req, TileRequest);
 					assert.equal(_req.filename, 't.png');
 					assert.equal(_req.hasFilename, false);
-					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+					callback(null, Buffer.from('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
@@ -481,7 +481,7 @@ describe('TileServer', function() {
 					assert.instanceOf(_req, TileRequest);
 					assert.equal(_req.filename, 't@2x.png');
 					assert.equal(_req.hasFilename, false);
-					callback(null, new Buffer('response', 'utf8'), {'X-Test': 'hello'});
+					callback(null, Buffer.from('response', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
@@ -503,7 +503,7 @@ describe('TileServer', function() {
 			server.layer('layer').route('t.png')
 				.use({
 					serve: function(_server, _req, callback) {
-						callback(null, new Buffer('response', 'utf8'), {
+						callback(null, Buffer.from('response', 'utf8'), {
 							'b': '3',
 							'X-Test': 'hello',
 							'cOnTeNt-LenGth': '123456'
@@ -572,7 +572,7 @@ describe('TileServer', function() {
 					assert.equal(_req.x, 2);
 					assert.equal(_req.y, 3);
 					assert.equal(_req.z, 1);
-					callback(null, new Buffer('result', 'utf8'), {'X-Test': 'hello'});
+					callback(null, Buffer.from('result', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
@@ -599,7 +599,7 @@ describe('TileServer', function() {
 					assert.equal(_req.x, 2);
 					assert.equal(_req.y, 3);
 					assert.equal(_req.z, 1);
-					callback(null, new Buffer('result', 'utf8'), {'X-Test': 'hello'});
+					callback(null, Buffer.from('result', 'utf8'), {'X-Test': 'hello'});
 				}
 			});
 
@@ -775,7 +775,7 @@ describe('TileServer', function() {
 
 			server.layer('mylayer').route('tile.txt').use({serve: function(server, req, callback) {
 				var message = 'hello x: ' + req.x + ' y: ' + req.y + ' z: ' + req.z;
-				callback(null, new Buffer(message, 'utf8'), {
+				callback(null, Buffer.from(message, 'utf8'), {
 					'Content-Type': 'text/plain',
 					'X-Header': 'test'
 				})

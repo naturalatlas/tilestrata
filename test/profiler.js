@@ -16,8 +16,8 @@ describe('profiling', function() {
 				url: '/mylayer/3/2/1/tile.txt',
 				reqhook   : [20, []],
 				cacheget  : [20, [new Error('err')]],
-				provider  : [20, [null, new Buffer(100), {}]],
-				transform : [20, [null, new Buffer(200), {}]],
+				provider  : [20, [null, Buffer.alloc(100), {}]],
+				transform : [20, [null, Buffer.alloc(200), {}]],
 				cacheset  : [20, []],
 				reshook   : [20, []]
 			},
@@ -25,15 +25,15 @@ describe('profiling', function() {
 				url: '/mylayer/3/2/1/tile.txt',
 				reqhook   : [30, []],
 				cacheget  : [30, [new Error('err')]],
-				provider  : [550, [null, new Buffer(500), {}]],
-				transform : [1100, [null, new Buffer(300), {}]],
+				provider  : [550, [null, Buffer.alloc(500), {}]],
+				transform : [1100, [null, Buffer.alloc(300), {}]],
 				cacheset  : [30, []],
 				reshook   : [30, []]
 			},
 			{
 				url: '/mylayer/3/2/1/tile.txt',
 				reqhook   : [40, []],
-				cacheget  : [40, [null, new Buffer(100), {}]],
+				cacheget  : [40, [null, Buffer.alloc(100), {}]],
 				provider  : null,
 				transform : null,
 				cacheset  : null,
@@ -42,7 +42,7 @@ describe('profiling', function() {
 			{
 				url: '/mylayer2/8/2/1/tile.txt',
 				reqhook   : [40, []],
-				cacheget  : [40, [null, new Buffer(100), {}]],
+				cacheget  : [40, [null, Buffer.alloc(100), {}]],
 				provider  : null,
 				transform : null,
 				cacheset  : null,
@@ -51,7 +51,7 @@ describe('profiling', function() {
 			{
 				url: '/mylayer2/8/2/1/tile2.txt',
 				reqhook   : [40, []],
-				cacheget  : [40, [null, new Buffer(100), {}]],
+				cacheget  : [40, [null, Buffer.alloc(100), {}]],
 				provider  : null,
 				transform : null,
 				cacheset  : null,

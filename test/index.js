@@ -126,11 +126,11 @@ describe('require("tilestrata")', function() {
 					}
 				})
 				.use({serve: function(server, req, callback) {
-					callback(null, new Buffer('tile', 'utf8'), {'X-Test':'1'});
+					callback(null, Buffer.from('tile', 'utf8'), {'X-Test':'1'});
 				}});
 
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
-			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {status: 200, headers: expected_headers, buffer: new Buffer('tile', 'utf8')}, function() {
+			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {status: 200, headers: expected_headers, buffer: Buffer.from('tile', 'utf8')}, function() {
 				assert.isTrue(reqhook_called, 'Request hook called');
 				assert.isTrue(reshook_called, 'Response hook called');
 				done();
@@ -158,7 +158,7 @@ describe('require("tilestrata")', function() {
 						}, 100);
 					},
 					serve: function(server, req, callback) {
-						callback(null, new Buffer(String(initCalled), 'utf8'), {});
+						callback(null, Buffer.from(String(initCalled), 'utf8'), {});
 					}
 				});
 
@@ -166,7 +166,7 @@ describe('require("tilestrata")', function() {
 			testMiddleware(middleware, '/tiles/basemap/3/2/1/file.txt', false, {
 				status: 200,
 				headers: expected_headers,
-				buffer: new Buffer('true', 'utf8')
+				buffer: Buffer.from('true', 'utf8')
 			}, function() {
 				done();
 			});
@@ -174,7 +174,7 @@ describe('require("tilestrata")', function() {
 		it('should call next() when route url doesn\'t match', function(done) {
 			var server = new TileServer();
 			server.layer('basemap').route('file.txt').use({serve: function(server, req, callback) {
-				callback(null, new Buffer('tile', 'utf8'), {'X-Test':'1'});
+				callback(null, Buffer.from('tile', 'utf8'), {'X-Test':'1'});
 			}});
 			var middleware = tilestrata.middleware({server: server, prefix: '/tiles'});
 			testMiddleware(middleware, '/basemap/3/2/1/file.txt', true, null, done);

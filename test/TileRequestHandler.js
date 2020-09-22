@@ -380,7 +380,7 @@ describe('TileRequestHandler', function() {
 					_cache2_called = true;
 					assert.equal(server, mockServer);
 					assert.isTrue(_cache1_called, 'Cache 1 should have been called first');
-					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
+					callback(null, Buffer.from('success', 'utf8'), {'X-Test-Status': 'success'});
 				},
 				set: function() {}
 			});
@@ -414,7 +414,7 @@ describe('TileRequestHandler', function() {
 			});
 			handler.use({
 				serve: function(server, req, callback) {
-					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
+					callback(null, Buffer.from('success', 'utf8'), {'X-Test-Status': 'success'});
 				}
 			});
 			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
@@ -483,7 +483,7 @@ describe('TileRequestHandler', function() {
 			});
 			handler.use({
 				serve: function(server, req, callback) {
-					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
+					callback(null, Buffer.from('success', 'utf8'), {'X-Test-Status': 'success'});
 				}
 			});
 			handler.use({
@@ -522,7 +522,7 @@ describe('TileRequestHandler', function() {
 			});
 			handler.use({
 				serve: function(server, req, callback) {
-					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
+					callback(null, Buffer.from('success', 'utf8'), {'X-Test-Status': 'success'});
 				}
 			});
 			handler.use({
@@ -532,7 +532,7 @@ describe('TileRequestHandler', function() {
 					assert.instanceOf(buffer, Buffer);
 					assert.equal(buffer.toString('utf8'), 'success');
 					assert.deepEqual(headers, {'X-Test-Status': 'success'});
-					callback(null, new Buffer('transform1', 'utf8'), {'X-Transform': '1'});
+					callback(null, Buffer.from('transform1', 'utf8'), {'X-Transform': '1'});
 				}
 			});
 			handler.use({
@@ -542,7 +542,7 @@ describe('TileRequestHandler', function() {
 					assert.instanceOf(buffer, Buffer);
 					assert.equal(buffer.toString('utf8'), 'transform1');
 					assert.deepEqual(headers, {'X-Transform': '1'});
-					callback(null, new Buffer('transform2', 'utf8'), {'X-Transform': '2'});
+					callback(null, Buffer.from('transform2', 'utf8'), {'X-Transform': '2'});
 				}
 			});
 			handler.GET(mockServer, mockRequest, function(status, buffer, headers) {
@@ -591,7 +591,7 @@ describe('TileRequestHandler', function() {
 			handler.use({
 				get: function(server, req, callback) {
 					assert.isTrue(_cache1_called);
-					callback(null, new Buffer('success', 'utf8'), {'X-Test-Status': 'success'});
+					callback(null, Buffer.from('success', 'utf8'), {'X-Test-Status': 'success'});
 				},
 				set: function() {}
 			});
@@ -634,7 +634,7 @@ describe('TileRequestHandler', function() {
 
 			handler.use({
 				get: function(server, req, callback) {
-					var cacheData = new Buffer('cachedata', 'utf8');
+					var cacheData = Buffer.from('cachedata', 'utf8');
 					var cacheHeaders = {'X-Step': 'cache'};
 					callback(null, cacheData, cacheHeaders, true);
 				},
@@ -643,7 +643,7 @@ describe('TileRequestHandler', function() {
 
 			handler.use({
 				serve: function(server, req, callback) {
-					var _buffer = new Buffer('thedata', 'utf8');
+					var _buffer = Buffer.from('thedata', 'utf8');
 					callback(null, _buffer, {'X-Step': 'provider'});
 				}
 			});
@@ -685,7 +685,7 @@ describe('TileRequestHandler', function() {
 
 			handler.use({
 				serve: function(server, req, callback) {
-					var _buffer = new Buffer('success', 'utf8');
+					var _buffer = Buffer.from('success', 'utf8');
 					var _headers = {'X-Test-Status': 'success'};
 					callback(null, _buffer, _headers);
 				}
@@ -705,7 +705,7 @@ describe('TileRequestHandler', function() {
 				serve: function(server, req, callback) {
 					assert.equal(server, mockServer);
 					assert.equal(req, mockRequest);
-					var _buffer = new Buffer('success', 'utf8');
+					var _buffer = Buffer.from('success', 'utf8');
 					var _headers = {'X-Test-Status': 'success'};
 					callback(null, _buffer, _headers);
 				}
@@ -741,7 +741,7 @@ describe('TileRequestHandler', function() {
 				serve: function(server, req, callback) {
 					_calls_provider++;
 					setImmediate(function() {
-						var _buffer = new Buffer('success', 'utf8');
+						var _buffer = Buffer.from('success', 'utf8');
 						var _headers = {'X-Test-Status': 'success'};
 						callback(null, _buffer, _headers);
 					});
@@ -782,7 +782,7 @@ describe('TileRequestHandler', function() {
 
 			handler.use({
 				serve: function(server, req, callback) {
-					var _buffer = new Buffer('success', 'utf8');
+					var _buffer = Buffer.from('success', 'utf8');
 					var _headers = {'X-Test-Status': 'success'};
 					callback(null, _buffer, _headers);
 				}
@@ -812,7 +812,7 @@ describe('TileRequestHandler', function() {
 
 			handler.use({
 				serve: function(server, req, callback) {
-					var _buffer = new Buffer('success', 'utf8');
+					var _buffer = Buffer.from('success', 'utf8');
 					var _headers = {'X-Test-Status': 'success'};
 					callback(null, _buffer, _headers);
 				}
@@ -842,7 +842,7 @@ describe('TileRequestHandler', function() {
 
 			handler.use({
 				serve: function(server, req, callback) {
-					var _buffer = new Buffer('success', 'utf8');
+					var _buffer = Buffer.from('success', 'utf8');
 					var _headers = {'X-Test-Status': 'success'};
 					callback(null, _buffer, _headers);
 				}
@@ -864,7 +864,7 @@ describe('TileRequestHandler', function() {
 				serve: function(server, req, callback) {
 					++_calls;
 					setTimeout(function() {
-						var _buffer = new Buffer('success', 'utf8');
+						var _buffer = Buffer.from('success', 'utf8');
 						callback(null, _buffer, {});
 					}, 10);
 				}
@@ -912,7 +912,7 @@ describe('TileRequestHandler', function() {
 
 			handler.use({
 				serve: function(server, req, callback) {
-					var _buffer = new Buffer('success', 'utf8');
+					var _buffer = Buffer.from('success', 'utf8');
 					var _headers = {'X-Test-Status': 'success'};
 					callback(null, _buffer, _headers);
 				}
