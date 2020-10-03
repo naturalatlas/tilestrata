@@ -768,6 +768,84 @@ describe('TileServer', function() {
 				done();
 			});
 		});
+		it('should should still succeed if layer fails and skipFailures=true', function(done) {
+			var _layer1_provider2 = false;
+			var _layer2_provider1 = false;
+			var server = new TileServer({ skipFailures: true });
+
+			server.layer('layer1')
+				.route('tile.png').use({
+					init: function(_server, callback) {
+						callback(new Error('Init fail'));
+					},
+					serve: function(server, req, callback) {
+						callback(null, Buffer.from('Should not be called', 'utf8'), {
+							'Content-Type': 'text/plain',
+						});
+					}
+				})
+				.route('tile2.png').use({
+					init: function(_server, callback) {
+						_layer1_provider2 = true;
+						assert.equal(_server, server);
+						callback();
+					},
+					serve: function() {}
+				});
+
+			server.layer('layer2')
+				.route('tile.png').use({
+					init: function(_server, callback) {
+						_layer2_provider1 = true;
+						assert.equal(_server, server);
+						callback();
+					},
+					serve: function() {}
+				})
+				.route('tile2.txt').use({
+					serve: function(server, req, callback) {
+						callback(null, Buffer.from('Hello world', 'utf8'), {
+							'Content-Type': 'text/plain',
+						});
+					}
+				});
+
+			server.listen(8889, function(err) {
+				if (err) throw err;
+				assert.isTrue(_layer1_provider2);
+				assert.isTrue(_layer2_provider1);
+				async.series([
+					// try failed tile
+					function(callback) {
+						http.get('http://localhost:8889/layer1/3/2/1/tile.png', function(res) {
+							var body = '';
+							res.on('data', function(data) { body += data; });
+							res.on('end', function() {
+								assert.equal(res.statusCode, 500);
+								assert.equal(body, 'Not initialized');
+								callback();
+							});
+						});
+					},
+					// try initialized tile
+					function(callback) {
+						http.get('http://localhost:8889/layer2/3/2/1/tile2.txt', function(res) {
+							var body = '';
+							res.on('data', function(data) { body += data; });
+							res.on('end', function() {
+								assert.equal(res.statusCode, 200);
+								assert.equal(body, 'Hello world');
+								callback();
+							});
+						});
+					}
+				], function(err) {
+					server.close(function() {
+						done(err);
+					});
+				});
+			});
+		});
 	});
 	describe('listen()', function() {
 		it('should start server on specified port', function(done) {
@@ -778,7 +856,7 @@ describe('TileServer', function() {
 				callback(null, Buffer.from(message, 'utf8'), {
 					'Content-Type': 'text/plain',
 					'X-Header': 'test'
-				})
+				});
 			}});
 
 			var result = server.listen(8889, function(err) {

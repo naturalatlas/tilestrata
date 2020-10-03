@@ -120,6 +120,14 @@ app.use(tilestrata.middleware({
 
 ## Usage Notes
 
+### Fault-Tolerant Initialization
+
+By default, TileStrata will error when initializing if any of the layer handlers fail to initialize. If you would like to ignore errors so that _other_ layers are booted up and available, use the `skipErrors` option:
+
+```js
+var strata = tilestrata({ skipErrors: true });
+```
+
 ### Metatile-Aware Load Balancing & Layer Sharding
 
 TileStrata >= [2.0.0](https://github.com/naturalatlas/tilestrata/releases/tag/v2.0.0) supports integration with [TileStrata Balancer](https://github.com/naturalatlas/tilestrata-balancer), an elastic load balancer designed specifically for the nuances of tile serving – particularly [metatiles](http://wiki.openstreetmap.org/wiki/Meta_tiles). Generic load balancers have no knowledge of metatiles and thus will naively split tile requests out to multiple servers which leads to redundant rendering (slow and a waste of computing power).
@@ -166,16 +174,16 @@ TileStrata includes a `/health` endpoint that will return a `200 OK` if it can a
 ```js
 // not healthy
 var strata = tilestrata({
-	healthy: function(callback) {
-	    callback(new Error('CPU is too high'), {loadavg: 3});
-	}
+    healthy: function(callback) {
+        callback(new Error('CPU is too high'), {loadavg: 3});
+    }
 });
 
 // healthy
 var strata = tilestrata({
-	healthy: function(callback) {
-	    callback(null, {loadavg: 1});
-	}
+    healthy: function(callback) {
+        callback(null, {loadavg: 1});
+    }
 });
 ```
 
@@ -375,7 +383,7 @@ $ npm test
 
 ## License
 
-Copyright &copy; 2014–2016 [Natural Atlas, Inc.](https://github.com/naturalatlas) & [Contributors](https://github.com/naturalatlas/tilestrata/graphs/contributors)
+Copyright &copy; 2014–2020 [Natural Atlas, Inc.](https://github.com/naturalatlas) & [Contributors](https://github.com/naturalatlas/tilestrata/graphs/contributors)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
 
