@@ -122,10 +122,10 @@ app.use(tilestrata.middleware({
 
 ### Fault-Tolerant Initialization
 
-By default, TileStrata will error when initializing if any of the layer handlers fail to initialize. If you would like to ignore errors so that _other_ layers are booted up and available, use the `skipErrors` option:
+By default, TileStrata will error when initializing if any of the layer handlers fail to initialize. If you would like to ignore errors so that _other_ layers are booted up and available, use the `skipFailures` option:
 
 ```js
-var strata = tilestrata({ skipErrors: true });
+var strata = tilestrata({ skipFailures: true });
 ```
 
 ### Metatile-Aware Load Balancing & Layer Sharding
