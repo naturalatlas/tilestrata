@@ -60,12 +60,12 @@ TileStrata consists of five main actors, usually implemented as plugins:
 ## Configuration
 
 ```js
-var tilestrata = require('tilestrata');
-var disk = require('tilestrata-disk');
-var sharp = require('tilestrata-sharp');
-var mapnik = require('tilestrata-mapnik');
-var dependency = require('tilestrata-dependency');
-var strata = tilestrata();
+const tilestrata = require('tilestrata');
+const disk = require('tilestrata-disk');
+const sharp = require('tilestrata-sharp');
+const mapnik = require('tilestrata-mapnik');
+const dependency = require('tilestrata-dependency');
+const strata = tilestrata();
 
 // define layers
 strata.layer('basemap')
@@ -107,8 +107,8 @@ As of [2.1.0](https://github.com/naturalatlas/tilestrata/releases/tag/v2.1.0), i
 TileStrata comes with middleware for Express that makes serving tiles from an existing application really simple, eliminating the need to call `listen` on `strata`.
 
 ```js
-var tilestrata = require('tilestrata');
-var strata = tilestrata();
+const tilestrata = require('tilestrata');
+const strata = tilestrata();
 strata.layer('basemap') /* ... */
 strata.layer('contours') /* ... */
 
@@ -173,14 +173,14 @@ TileStrata includes a `/health` endpoint that will return a `200 OK` if it can a
 
 ```js
 // not healthy
-var strata = tilestrata({
+const strata = tilestrata({
     healthy: function(callback) {
         callback(new Error('CPU is too high'), {loadavg: 3});
     }
 });
 
 // healthy
-var strata = tilestrata({
+const strata = tilestrata({
     healthy: function(callback) {
         callback(null, {loadavg: 1});
     }
@@ -373,6 +373,18 @@ module.exports = function() {
 };
 ```
 
+## Misc Utilities
+
+### Concurrency Limiting
+
+In some cases you'll want explicitly limit concurrency of a provider so that requests are queued if too many happen at once. To support this, we provide a `wrapWithMaxConcurrency` method that wraps providers. This is particularly useful with the [tilestrata-proxy](https://github.com/naturalatlas/tilestrata-proxy) plugin.
+
+```js
+const { wrapWithMaxConcurrency } = tilestrata.utils;
+
+.use(wrapWithMaxConcurrency(provider(...), 5))
+```
+
 ## Contributing
 
 Before submitting pull requests, please update the [tests](test) and make sure they all pass.
@@ -383,7 +395,7 @@ $ npm test
 
 ## License
 
-Copyright &copy; 2014–2020 [Natural Atlas, Inc.](https://github.com/naturalatlas) & [Contributors](https://github.com/naturalatlas/tilestrata/graphs/contributors)
+Copyright &copy; 2014–2021 [Natural Atlas, Inc.](https://github.com/naturalatlas) & [Contributors](https://github.com/naturalatlas/tilestrata/graphs/contributors)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0
 

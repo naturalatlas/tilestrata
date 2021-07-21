@@ -2,6 +2,7 @@ var TileLayer = require('./lib/TileLayer.js');
 var TileRequest = require('./lib/TileRequest.js');
 var TileRequestHandler = require('./lib/TileRequestHandler.js');
 var TileServer = require('./lib/TileServer.js');
+var utils = require('./lib/utils.js');
 
 module.exports = function(options) {
 	return new TileServer(options);
@@ -11,6 +12,7 @@ module.exports.TileServer = TileServer;
 module.exports.TileRequest = TileRequest;
 module.exports.TileRequestHandler = TileRequestHandler;
 module.exports.TileLayer = TileLayer;
+module.exports.utils = utils;
 
 module.exports.createServer = function() {
 	console.warn('tilestrata.createServer() is deprecated, use tilestrata() instead');
