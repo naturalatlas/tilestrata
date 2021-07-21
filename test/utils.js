@@ -1,5 +1,6 @@
 var async = require('async');
 var utils = require('../lib/utils.js');
+var TileRequest = require('../lib/TileRequest.js');
 var assert = require('chai').assert;
 
 describe('utils', function() {
@@ -31,7 +32,10 @@ describe('utils', function() {
 			var result = [];
 			var runner = (taskId, shouldFail) => {
 				return callback => {
-					plugin[0].serve(null, { id: taskId, shouldFail }, (err, body, headers) => {
+					var req = new TileRequest();
+					req.id = taskId;
+					req.shouldFail = shouldFail;
+					plugin[0].serve(null, req, (err, body, headers) => {
 						result.push(err ? '#' + taskId + ' failed' : body);
 						callback();
 					});
